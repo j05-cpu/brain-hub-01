@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -212,7 +211,7 @@ button.diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     <span class="streak-text">Days</span>
   </div>
 
-  <!-- START -->
+  <!-- START SCREEN -->
   <div class="screen active" id="screen-start">
     <div class="start-icon">🧠</div>
     <h1>Are You Smarter Than AI?</h1>
@@ -225,7 +224,7 @@ button.diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     <button type="button" class="btn" id="btn-go-difficulty">Choose Difficulty</button>
   </div>
 
-  <!-- DIFFICULTY -->
+  <!-- DIFFICULTY SCREEN -->
   <div class="screen" id="screen-difficulty">
     <div class="diff-title">⚙️ Select Difficulty</div>
     <div class="diff-sub">How smart is the AI you're up against?</div>
@@ -259,7 +258,7 @@ button.diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     <button type="button" class="btn outline" id="btn-back-to-start" style="margin-top:10px;">← Back</button>
   </div>
 
-  <!-- QUIZ -->
+  <!-- QUIZ SCREEN -->
   <div class="screen" id="screen-quiz">
     <div class="hud">
       <span class="q-counter" id="q-counter">Question 1 of 5</span>
@@ -278,7 +277,7 @@ button.diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     <p class="feedback" id="feedback"></p>
   </div>
 
-  <!-- RESULT -->
+  <!-- RESULT SCREEN -->
   <div class="screen" id="screen-result">
     <div class="result-card">
       <div class="streak-milestone" id="streak-milestone"></div>
@@ -324,8 +323,7 @@ button.diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     <button type="button" class="btn outline" id="btn-home">Back to Home</button>
   </div>
 
-</div>
-
+</div><!-- /container -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -352,10 +350,10 @@ document.addEventListener("DOMContentLoaded", function () {
     return Math.round((new Date(b) - new Date(a)) / 86400000);
   }
 
-  function readStreak()    { return parseInt(localStorage.getItem(STREAK_KEY) || "0", 10); }
-  function writeStreak(v)  { localStorage.setItem(STREAK_KEY, String(v)); }
-  function readLastDate()  { return localStorage.getItem(DATE_KEY) || ""; }
-  function writeLastDate(d){ localStorage.setItem(DATE_KEY, d); }
+  function readStreak()     { return parseInt(localStorage.getItem(STREAK_KEY) || "0", 10); }
+  function writeStreak(v)   { localStorage.setItem(STREAK_KEY, String(v)); }
+  function readLastDate()   { return localStorage.getItem(DATE_KEY) || ""; }
+  function writeLastDate(d) { localStorage.setItem(DATE_KEY, d); }
 
   function renderStreakBadge(n, highlight) {
     var el = document.getElementById("streak-count");
@@ -377,7 +375,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!last) {
       streak = 1; isNew = true;
     } else if (last === today) {
-      /* no change */
+      /* no change — already played today */
     } else {
       var diff = daysBetween(last, today);
       if (diff === 1) { streak += 1; isNew = true; }
@@ -389,16 +387,16 @@ document.addEventListener("DOMContentLoaded", function () {
     return { streak: streak, isNew: isNew, wasReset: wasReset };
   }
 
-  /* init display */
+  /* init streak display on page load (read-only) */
   (function () {
-    var s    = readStreak();
-    var last = readLastDate();
+    var s     = readStreak();
+    var last  = readLastDate();
     var today = todayStr();
     if (!last || (last !== today && daysBetween(last, today) > 1)) s = 0;
     renderStreakBadge(s, false);
   }());
 
-  /* ── Difficulty ── */
+  /* ── Difficulty config ── */
   var DIFF = {
     easy:   { label:"Easy AI",   icon:"🟢", badgeCls:"drb-easy",   color:"#34d399", aiMin:1, aiMax:2 },
     smart:  { label:"Smart AI",  icon:"🔵", badgeCls:"drb-smart",  color:"#60a5fa", aiMin:3, aiMax:4 },
@@ -447,3 +445,274 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var perfTiers = [
     { max:1, icon:"☕", label:"Needs More Coffee",       cls:"tier-1" },
+    { max:2, icon:"🧩", label:"Average Brain",           cls:"tier-2" },
+    { max:3, icon:"⚡", label:"Sharp Mind",              cls:"tier-3" },
+    { max:4, icon:"🚀", label:"Elite Thinker",           cls:"tier-4" },
+    { max:5, icon:"👑", label:"Human Superintelligence", cls:"tier-5" }
+  ];
+
+  /* ── Quiz state ── */
+  var currentQ  = 0;
+  var score     = 0;
+  var countdown = null;
+  var timeLeft  = 30;
+  var answered  = false;
+  var shareText = "";
+
+  /* ── Navigation ── */
+  document.getElementById("btn-go-difficulty").addEventListener("click", function (e) {
+    e.preventDefault();
+    showScreen("screen-difficulty");
+  });
+
+  document.getElementById("btn-back-to-start").addEventListener("click", function (e) {
+    e.preventDefault();
+    showScreen("screen-start");
+  });
+
+  document.getElementById("btn-play-again").addEventListener("click", function (e) {
+    e.preventDefault();
+    document.querySelectorAll(".diff-card").forEach(function (c) { c.classList.remove("selected"); });
+    selectedDiff = "";
+    var bsq = document.getElementById("btn-start-quiz");
+    bsq.disabled = true;
+    bsq.textContent = "Select a difficulty to continue";
+    showScreen("screen-difficulty");
+  });
+
+  document.getElementById("btn-home").addEventListener("click", function (e) {
+    e.preventDefault();
+    showScreen("screen-start");
+  });
+
+  /* ── Difficulty card selection ── */
+  document.querySelectorAll(".diff-card").forEach(function (card) {
+    function selectCard() {
+      document.querySelectorAll(".diff-card").forEach(function (c) { c.classList.remove("selected"); });
+      card.classList.add("selected");
+      selectedDiff = card.getAttribute("data-diff");
+      var bsq = document.getElementById("btn-start-quiz");
+      bsq.disabled = false;
+      bsq.textContent = "Start vs " + DIFF[selectedDiff].label + " →";
+    }
+    card.addEventListener("click", selectCard);
+    card.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCard(); }
+    });
+  });
+
+  document.getElementById("btn-start-quiz").addEventListener("click", function (e) {
+    e.preventDefault();
+    if (!selectedDiff) return;
+    startQuiz();
+  });
+
+  /* ── Share button ── */
+  document.getElementById("btn-share").addEventListener("click", function (e) {
+    e.preventDefault();
+    var lbl  = document.getElementById("share-label");
+    var icon = document.getElementById("btn-share").querySelector(".share-icon");
+    if (navigator.share) {
+      navigator.share({ title: "Are You Smarter Than AI?", text: shareText }).catch(function () {});
+    } else {
+      navigator.clipboard.writeText(shareText).then(function () {
+        lbl.textContent = "Score Copied!";
+        document.getElementById("btn-share").classList.add("copied");
+        icon.textContent = "✅";
+        setTimeout(function () {
+          lbl.textContent = "Share Your Score";
+          document.getElementById("btn-share").classList.remove("copied");
+          icon.textContent = "📤";
+        }, 2500);
+      }).catch(function () { alert("Copy this:\n\n" + shareText); });
+    }
+  });
+
+  /* ── Quiz functions ── */
+  function startQuiz() {
+    currentQ = 0;
+    score    = 0;
+    var d   = DIFF[selectedDiff];
+    var ind = document.getElementById("diff-indicator");
+    ind.textContent = d.icon + " " + d.label;
+    ind.style.color = d.color;
+    showScreen("screen-quiz");
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    answered = false;
+    clearInterval(countdown);
+    timeLeft = 30;
+
+    var q = questions[currentQ];
+    document.getElementById("q-counter").textContent     = "Question " + (currentQ + 1) + " of " + questions.length;
+    document.getElementById("score-display").textContent = "Score: " + score;
+    document.getElementById("progress-fill").style.width = (currentQ / questions.length * 100) + "%";
+    document.getElementById("question-text").textContent = q.q;
+
+    var fb = document.getElementById("feedback");
+    fb.textContent = "";
+    fb.className   = "feedback";
+
+    var choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+    q.choices.forEach(function (text, idx) {
+      var btn = document.createElement("button");
+      btn.type        = "button";
+      btn.className   = "choice-btn";
+      btn.textContent = text;
+      btn.addEventListener("click", function () { selectAnswer(idx); });
+      choicesEl.appendChild(btn);
+    });
+
+    runTimer();
+  }
+
+  function runTimer() {
+    var el = document.getElementById("timer");
+    el.textContent = timeLeft;
+    el.className   = "";
+    countdown = setInterval(function () {
+      timeLeft -= 1;
+      el.textContent = timeLeft;
+      el.className   = timeLeft <= 10 ? "danger" : "";
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        if (!answered) { timeUp(); }
+      }
+    }, 1000);
+  }
+
+  function timeUp() {
+    answered = true;
+    lockChoices();
+    var q    = questions[currentQ];
+    var btns = document.querySelectorAll(".choice-btn");
+    if (btns[q.answer]) { btns[q.answer].classList.add("correct"); }
+    var fb = document.getElementById("feedback");
+    fb.textContent = "⏱ Time's up! " + q.explain;
+    fb.className   = "feedback wrong";
+    setTimeout(advance, 2800);
+  }
+
+  function selectAnswer(idx) {
+    if (answered) return;
+    answered = true;
+    clearInterval(countdown);
+    var q    = questions[currentQ];
+    var btns = document.querySelectorAll(".choice-btn");
+    lockChoices();
+    var fb = document.getElementById("feedback");
+    if (idx === q.answer) {
+      score += 1;
+      btns[idx].classList.add("correct");
+      fb.textContent = "✅ Correct! " + q.explain;
+      fb.className   = "feedback correct";
+    } else {
+      btns[idx].classList.add("wrong");
+      if (btns[q.answer]) { btns[q.answer].classList.add("correct"); }
+      fb.textContent = "❌ Wrong! " + q.explain;
+      fb.className   = "feedback wrong";
+    }
+    document.getElementById("score-display").textContent = "Score: " + score;
+    setTimeout(advance, 2800);
+  }
+
+  function lockChoices() {
+    document.querySelectorAll(".choice-btn").forEach(function (b) { b.disabled = true; });
+  }
+
+  function advance() {
+    currentQ += 1;
+    if (currentQ < questions.length) { loadQuestion(); }
+    else { showResult(); }
+  }
+
+  /* ── Result ── */
+  function showResult() {
+    var lbl  = document.getElementById("share-label");
+    var icon = document.getElementById("btn-share").querySelector(".share-icon");
+    lbl.textContent = "Share Your Score";
+    document.getElementById("btn-share").classList.remove("copied");
+    icon.textContent = "📤";
+
+    showScreen("screen-result");
+
+    var sr  = commitStreak();
+    var msEl = document.getElementById("streak-milestone");
+    msEl.className   = "streak-milestone";
+    msEl.textContent = "";
+    if (sr.wasReset) {
+      msEl.className   = "streak-milestone show";
+      msEl.textContent = "💔 Streak reset — but you're back! New streak started 🔥";
+    } else if (sr.isNew && sr.streak >= 7) {
+      msEl.className   = "streak-milestone show";
+      msEl.textContent = "🏅 " + sr.streak + "-day streak — you're on fire! 🔥";
+    } else if (sr.isNew && sr.streak >= 3) {
+      msEl.className   = "streak-milestone show";
+      msEl.textContent = "🔥 " + sr.streak + "-day streak! Keep it going!";
+    } else if (sr.isNew && sr.streak === 1) {
+      msEl.className   = "streak-milestone show";
+      msEl.textContent = "🔥 Streak started! Come back tomorrow to build it up!";
+    }
+
+    var d     = DIFF[selectedDiff];
+    var drbEl = document.getElementById("diff-result-badge");
+    drbEl.className   = "diff-result-badge " + d.badgeCls;
+    drbEl.textContent = d.icon + " vs " + d.label;
+
+    var aiScore   = d.aiMin + Math.floor(Math.random() * (d.aiMax - d.aiMin + 1));
+    var userScore = score;
+
+    var tier = perfTiers[0];
+    for (var i = 0; i < perfTiers.length; i++) {
+      if (userScore <= perfTiers[i].max) { tier = perfTiers[i]; break; }
+    }
+
+    shareText = "I scored " + userScore + "/5 on \"" + d.label + "\" in \"Are You Smarter Than AI?\" — ranked \"" + tier.label + "\" with a 🔥 " + sr.streak + "-day streak! Can you beat me?";
+
+    var perfEl = document.getElementById("perf-tier");
+    perfEl.className = "perf-tier " + tier.cls;
+    perfEl.innerHTML = "<span>" + tier.icon + "</span><span>" + tier.label + "</span>";
+
+    document.getElementById("ai-big-score").textContent   = aiScore;
+    document.getElementById("user-big-score").textContent = userScore;
+    document.getElementById("ai-bar-label").textContent   = aiScore + "/5";
+    document.getElementById("user-bar-label").textContent = userScore + "/5";
+
+    document.getElementById("ai-bar").style.width   = "0";
+    document.getElementById("user-bar").style.width = "0";
+    setTimeout(function () {
+      document.getElementById("ai-bar").style.width   = (aiScore   / 5 * 100) + "%";
+      document.getElementById("user-bar").style.width = (userScore / 5 * 100) + "%";
+    }, 150);
+
+    var emoji, title, vCls, vTxt, blurb;
+    if (userScore > aiScore) {
+      emoji = "🏆"; title = "You Beat the AI!";
+      vCls  = "verdict-win";  vTxt = "🎉 You beat AI!";
+      blurb = "You scored " + userScore + "/5 while the " + d.label + " only managed " + aiScore + "/5. Outstanding!";
+    } else if (userScore === aiScore) {
+      emoji = "🤝"; title = "You Matched the AI!";
+      vCls  = "verdict-tie";  vTxt = "🤝 You matched AI.";
+      blurb = "Both you and the " + d.label + " scored " + userScore + "/5. A perfect tie — try a harder difficulty!";
+    } else {
+      emoji = "🤖"; title = "AI Wins This Round";
+      vCls  = "verdict-lose"; vTxt = "🤖 AI wins this round.";
+      blurb = "The " + d.label + " scored " + aiScore + "/5 vs your " + userScore + "/5. Don't give up — try again!";
+    }
+
+    document.getElementById("result-emoji").textContent   = emoji;
+    document.getElementById("result-title").textContent   = title;
+    document.getElementById("result-verdict").textContent = blurb;
+
+    var banner = document.getElementById("verdict-banner");
+    banner.textContent = vTxt;
+    banner.className   = "verdict-banner " + vCls;
+  }
+
+}); /* end DOMContentLoaded */
+</script>
+</body>
+</html>
