@@ -36,6 +36,7 @@
   }
   .btn.outline:hover { background: #1a1a2e; }
 
+  /* Quiz HUD */
   .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   .q-counter { color: #888; font-size: 0.9rem; }
   .score-display { color: #a78bfa; font-weight: bold; }
@@ -65,88 +66,97 @@
   .feedback.correct { color: #34d399; }
   .feedback.wrong { color: #f87171; }
 
-  /* Result Screen */
+  /* ── Result Screen ── */
   .result-card {
     background: #1a1a2e; border: 1px solid #2d2d4e;
-    border-radius: 14px; padding: 32px 24px;
+    border-radius: 14px; padding: 32px 24px 28px;
     text-align: center; margin-bottom: 16px;
   }
-  .result-emoji { font-size: 3.5rem; margin-bottom: 12px; }
-  .result-title { font-size: 1.6rem; color: #a78bfa; margin-bottom: 20px; }
 
+  /* Performance tier badge */
+  .perf-tier {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 22px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 18px;
+    border: 2px solid;
+  }
+  .tier-5 { background: #fef08a18; color: #fde047; border-color: #fde047; }
+  .tier-4 { background: #a78bfa18; color: #a78bfa; border-color: #a78bfa; }
+  .tier-3 { background: #34d39918; color: #34d399; border-color: #34d399; }
+  .tier-2 { background: #60a5fa18; color: #60a5fa; border-color: #60a5fa; }
+  .tier-1 { background: #f8717118; color: #f87171; border-color: #f87171; }
+
+  .result-emoji { font-size: 3.2rem; margin-bottom: 10px; }
+  .result-title { font-size: 1.5rem; color: #a78bfa; margin-bottom: 18px; }
+
+  /* Verdict banner */
   .verdict-banner {
     display: inline-block;
     padding: 10px 28px;
     border-radius: 50px;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    margin-bottom: 28px;
+    margin-bottom: 26px;
     letter-spacing: 0.03em;
   }
   .verdict-win  { background: #064e3b44; color: #34d399; border: 2px solid #34d399; }
   .verdict-tie  { background: #1e3a5f44; color: #60a5fa; border: 2px solid #60a5fa; }
   .verdict-lose { background: #7f1d1d44; color: #f87171; border: 2px solid #f87171; }
 
+  /* Score comparison */
   .score-comparison {
     display: flex;
     justify-content: center;
     align-items: stretch;
     gap: 0;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #2d2d4e;
   }
   .score-side {
-    flex: 1;
-    padding: 20px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    position: relative;
+    flex: 1; padding: 20px 12px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
   }
-  .score-side.ai-side { background: #12122a; border-right: 1px solid #2d2d4e; }
+  .score-side.ai-side   { background: #12122a; border-right: 1px solid #2d2d4e; }
   .score-side.user-side { background: #12122a; }
-  .score-side .avatar { font-size: 2rem; }
-  .score-side .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
-  .score-side .big-score {
-    font-size: 2.8rem;
-    font-weight: 800;
-    line-height: 1;
-  }
-  .score-side .fraction { font-size: 0.85rem; color: #666; }
-  .ai-side .big-score { color: #f87171; }
+  .score-side .avatar   { font-size: 2rem; }
+  .score-side .label    { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
+  .score-side .big-score { font-size: 2.8rem; font-weight: 800; line-height: 1; }
+  .score-side .fraction  { font-size: 0.85rem; color: #666; }
+  .ai-side   .big-score { color: #f87171; }
   .user-side .big-score { color: #34d399; }
 
   .vs-divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #0f0f1a;
-    padding: 0 4px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #555;
-    letter-spacing: 0.05em;
-    min-width: 32px;
-    border-left: 1px solid #2d2d4e;
-    border-right: 1px solid #2d2d4e;
+    display: flex; align-items: center; justify-content: center;
+    background: #0f0f1a; padding: 0 4px;
+    font-size: 0.75rem; font-weight: 700; color: #555;
+    letter-spacing: 0.05em; min-width: 32px;
+    border-left: 1px solid #2d2d4e; border-right: 1px solid #2d2d4e;
   }
 
-  .bar-wrap { width: 100%; padding: 0 24px; margin-bottom: 8px; }
-  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  /* Progress bars */
+  .bar-wrap { width: 100%; padding: 0 24px; margin-bottom: 10px; }
+  .bar-row  { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .bar-row-label { font-size: 0.78rem; color: #888; width: 32px; text-align: right; flex-shrink: 0; }
   .bar-track { flex: 1; height: 10px; background: #1e1e30; border-radius: 6px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 6px; transition: width 1s ease; width: 0; }
-  .bar-fill.ai-bar { background: #f87171; }
+  .bar-fill  { height: 100%; border-radius: 6px; transition: width 1s ease; width: 0; }
+  .bar-fill.ai-bar   { background: #f87171; }
   .bar-fill.user-bar { background: #34d399; }
-  .bar-score-label { font-size: 0.78rem; font-weight: 700; width: 28px; flex-shrink: 0; }
-  .bar-score-label.ai-label { color: #f87171; }
+  .bar-score-label   { font-size: 0.78rem; font-weight: 700; width: 28px; flex-shrink: 0; }
+  .bar-score-label.ai-label   { color: #f87171; }
   .bar-score-label.user-label { color: #34d399; }
 
   .result-verdict { color: #aaa; font-size: 0.9rem; line-height: 1.6; padding: 0 8px; }
 
+  /* Start screen */
   .start-icon { font-size: 3rem; text-align: center; margin-bottom: 16px; }
   .features { list-style: none; color: #888; font-size: 0.9rem; margin-bottom: 28px; text-align: center; line-height: 2; }
 </style>
@@ -188,6 +198,10 @@
   <!-- Result Screen -->
   <div class="screen" id="result-screen">
     <div class="result-card">
+
+      <!-- Performance tier badge -->
+      <div class="perf-tier" id="perf-tier"></div>
+
       <div class="result-emoji" id="result-emoji"></div>
       <div class="result-title" id="result-title"></div>
 
@@ -271,11 +285,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   ];
 
+  const perfTiers = [
+    { max: 1, icon: '☕', label: 'Needs More Coffee', cls: 'tier-1' },
+    { max: 2, icon: '🧩', label: 'Average Brain',     cls: 'tier-2' },
+    { max: 3, icon: '⚡', label: 'Sharp Mind',        cls: 'tier-3' },
+    { max: 4, icon: '🚀', label: 'Elite Thinker',     cls: 'tier-4' },
+    { max: 5, icon: '👑', label: 'Human Superintelligence', cls: 'tier-5' }
+  ];
+
   let currentQ = 0, score = 0, timer = null, timeLeft = 30, answered = false;
 
   const screens = {
-    start: document.getElementById('start-screen'),
-    quiz:  document.getElementById('quiz-screen'),
+    start:  document.getElementById('start-screen'),
+    quiz:   document.getElementById('quiz-screen'),
     result: document.getElementById('result-screen')
   };
 
@@ -378,49 +400,57 @@ document.addEventListener('DOMContentLoaded', function () {
   function showResult() {
     showScreen('result');
 
-    const aiScore = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5
+    const aiScore   = Math.floor(Math.random() * 3) + 3; // 3–5
     const userScore = score;
 
+    // Performance tier
+    const tier = perfTiers.find(t => userScore <= t.max) || perfTiers[perfTiers.length - 1];
+    const perfEl = document.getElementById('perf-tier');
+    perfEl.textContent = '';
+    perfEl.className = 'perf-tier ' + tier.cls;
+    perfEl.innerHTML = `<span>${tier.icon}</span><span>${tier.label}</span>`;
+
+    // Scores
     document.getElementById('ai-big-score').textContent   = aiScore;
     document.getElementById('user-big-score').textContent = userScore;
     document.getElementById('ai-bar-label').textContent   = aiScore + '/5';
     document.getElementById('user-bar-label').textContent = userScore + '/5';
 
-    // Animate bars after short delay
+    // Animate bars
     setTimeout(() => {
-      document.getElementById('ai-bar').style.width   = (aiScore / 5 * 100) + '%';
+      document.getElementById('ai-bar').style.width   = (aiScore   / 5 * 100) + '%';
       document.getElementById('user-bar').style.width = (userScore / 5 * 100) + '%';
     }, 150);
 
+    // Win / tie / lose
     let emoji, title, verdictClass, verdictText, blurb;
-
     if (userScore > aiScore) {
-      emoji       = '🏆';
-      title       = 'You Beat the AI!';
+      emoji        = '🏆';
+      title        = 'You Beat the AI!';
       verdictClass = 'verdict-win';
       verdictText  = '🎉 You beat AI!';
       blurb        = `You scored ${userScore}/5 while the AI only managed ${aiScore}/5. Exceptional reasoning — you outperformed the machine!`;
     } else if (userScore === aiScore) {
-      emoji       = '🤝';
-      title       = 'You Matched the AI!';
+      emoji        = '🤝';
+      title        = 'You Matched the AI!';
       verdictClass = 'verdict-tie';
       verdictText  = '🤝 You matched AI.';
       blurb        = `Both you and the AI scored ${userScore}/5. A perfect tie — you think just like a machine. Try again to break the deadlock!`;
     } else {
-      emoji       = '🤖';
-      title       = 'AI Wins This Round';
+      emoji        = '🤖';
+      title        = 'AI Wins This Round';
       verdictClass = 'verdict-lose';
       verdictText  = '🤖 AI wins this round.';
       blurb        = `The AI scored ${aiScore}/5 versus your ${userScore}/5. These questions are designed to fool humans — don't give up, try again!`;
     }
 
-    document.getElementById('result-emoji').textContent  = emoji;
-    document.getElementById('result-title').textContent  = title;
+    document.getElementById('result-emoji').textContent   = emoji;
+    document.getElementById('result-title').textContent   = title;
     document.getElementById('result-verdict').textContent = blurb;
 
     const banner = document.getElementById('verdict-banner');
-    banner.textContent  = verdictText;
-    banner.className    = 'verdict-banner ' + verdictClass;
+    banner.textContent = verdictText;
+    banner.className   = 'verdict-banner ' + verdictClass;
   }
 
 });
