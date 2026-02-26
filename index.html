@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,220 +6,205 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Are You Smarter Than AI?</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #0f0f1a;
-    color: #e0e0e0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
-  .container { width: 100%; max-width: 600px; }
-  .screen { display: none; }
-  .screen.active { display: block; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f0f1a;
+  color: #e0e0e0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.container { width: 100%; max-width: 600px; }
+.screen { display: none; }
+.screen.active { display: block; }
 
-  /* Streak Bar */
-  .streak-bar {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 50px;
-    padding: 10px 22px; margin-bottom: 24px;
-    width: fit-content; margin-left: auto; margin-right: auto;
-  }
-  .streak-flame { font-size: 1.3rem; animation: flicker 1.4s ease-in-out infinite alternate; }
-  @keyframes flicker {
-    0%   { transform: scale(1)    rotate(-3deg); }
-    50%  { transform: scale(1.12) rotate(2deg);  }
-    100% { transform: scale(1.05) rotate(-1deg); }
-  }
-  .streak-text  { font-size: 0.95rem; color: #aaa; }
-  .streak-count {
-    font-size: 1.05rem; font-weight: 800; color: #fb923c;
-    background: #fb923c18; border: 1px solid #fb923c44;
-    border-radius: 20px; padding: 2px 12px; min-width: 36px; text-align: center;
-  }
-  .streak-count.streak-new {
-    color: #fde047; border-color: #fde04766; background: #fde04718;
-    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  @keyframes pop {
-    0%   { transform: scale(0.7); opacity: 0.5; }
-    100% { transform: scale(1);   opacity: 1;   }
-  }
+.streak-bar {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 50px;
+  padding: 10px 22px; margin-bottom: 24px;
+  width: fit-content; margin-left: auto; margin-right: auto;
+}
+.streak-flame { font-size: 1.3rem; animation: flicker 1.4s ease-in-out infinite alternate; }
+@keyframes flicker {
+  0%   { transform: scale(1) rotate(-3deg); }
+  50%  { transform: scale(1.12) rotate(2deg); }
+  100% { transform: scale(1.05) rotate(-1deg); }
+}
+.streak-text { font-size: 0.95rem; color: #aaa; }
+.streak-count {
+  font-size: 1.05rem; font-weight: 800; color: #fb923c;
+  background: #fb923c18; border: 1px solid #fb923c44;
+  border-radius: 20px; padding: 2px 12px; min-width: 36px; text-align: center;
+}
+.streak-count.streak-new {
+  color: #fde047; border-color: #fde04766; background: #fde04718;
+  animation: pop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes pop {
+  0%   { transform: scale(0.7); opacity: 0.5; }
+  100% { transform: scale(1);   opacity: 1; }
+}
 
-  h1 { text-align: center; font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
-  .subtitle { text-align: center; color: #888; margin-bottom: 32px; font-size: 0.95rem; }
+h1 { text-align: center; font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
+.subtitle { text-align: center; color: #888; margin-bottom: 32px; font-size: 0.95rem; }
 
-  .btn {
-    display: block; width: 100%; padding: 14px;
-    background: #7c3aed; color: #fff; border: none;
-    border-radius: 10px; font-size: 1.1rem; cursor: pointer;
-    transition: background 0.2s, transform 0.1s; margin-top: 12px;
-  }
-  .btn:hover { background: #6d28d9; }
-  .btn:active { transform: scale(0.98); }
-  .btn.outline { background: transparent; border: 2px solid #7c3aed; color: #a78bfa; }
-  .btn.outline:hover { background: #1a1a2e; }
-  .btn.share-btn {
-    background: linear-gradient(135deg, #0ea5e9, #6366f1);
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-size: 1.05rem; font-weight: 700;
-  }
-  .btn.share-btn:hover { background: linear-gradient(135deg, #0284c7, #4f46e5); }
-  .btn.share-btn.copied { background: linear-gradient(135deg, #059669, #0d9488); }
-  .share-icon { font-size: 1.2rem; line-height: 1; }
+button.btn, button.diff-start-btn {
+  display: block; width: 100%; padding: 14px;
+  background: #7c3aed; color: #fff; border: none;
+  border-radius: 10px; font-size: 1.1rem; cursor: pointer;
+  transition: background 0.2s, transform 0.1s; margin-top: 12px;
+  font-family: inherit;
+}
+button.btn:hover, button.diff-start-btn:hover:not(:disabled) { background: #6d28d9; }
+button.btn:active, button.diff-start-btn:active { transform: scale(0.98); }
+button.btn.outline { background: transparent; border: 2px solid #7c3aed; color: #a78bfa; }
+button.btn.outline:hover { background: #1a1a2e; }
+button.btn.share-btn {
+  background: linear-gradient(135deg,#0ea5e9,#6366f1);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 1.05rem; font-weight: 700;
+}
+button.btn.share-btn:hover { background: linear-gradient(135deg,#0284c7,#4f46e5); }
+button.btn.share-btn.copied { background: linear-gradient(135deg,#059669,#0d9488); }
+.share-icon { font-size: 1.2rem; line-height: 1; }
+button.diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Difficulty Screen */
-  .diff-title { text-align: center; font-size: 1.5rem; font-weight: 700; color: #a78bfa; margin-bottom: 8px; }
-  .diff-sub   { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 28px; }
-  .diff-cards { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
-  .diff-card {
-    background: #1a1a2e; border: 2px solid #2d2d4e; border-radius: 14px;
-    padding: 20px 22px; cursor: pointer;
-    transition: border-color 0.2s, background 0.2s, transform 0.15s;
-    display: flex; align-items: center; gap: 18px; text-align: left;
-  }
-  .diff-card:hover  { background: #22223a; transform: translateY(-2px); }
-  .diff-card:active { transform: scale(0.98); }
-  .diff-card.selected { border-color: var(--dc); background: var(--db); }
-  .diff-card[data-diff="easy"]   { --dc: #34d399; --db: #064e3b18; }
-  .diff-card[data-diff="smart"]  { --dc: #60a5fa; --db: #1e3a5f18; }
-  .diff-card[data-diff="genius"] { --dc: #f87171; --db: #7f1d1d18; }
-  .diff-icon { font-size: 2.2rem; flex-shrink: 0; }
-  .diff-info { flex: 1; }
-  .diff-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
-  .diff-card[data-diff="easy"]   .diff-name { color: #34d399; }
-  .diff-card[data-diff="smart"]  .diff-name { color: #60a5fa; }
-  .diff-card[data-diff="genius"] .diff-name { color: #f87171; }
-  .diff-desc { font-size: 0.85rem; color: #888; line-height: 1.4; }
-  .diff-ai-score {
-    font-size: 0.78rem; font-weight: 700; padding: 4px 10px;
-    border-radius: 20px; flex-shrink: 0; white-space: nowrap;
-  }
-  .diff-card[data-diff="easy"]   .diff-ai-score { background: #34d39918; color: #34d399; border: 1px solid #34d39944; }
-  .diff-card[data-diff="smart"]  .diff-ai-score { background: #60a5fa18; color: #60a5fa; border: 1px solid #60a5fa44; }
-  .diff-card[data-diff="genius"] .diff-ai-score { background: #f8717118; color: #f87171; border: 1px solid #f8717144; }
-  .diff-start-btn {
-    background: #7c3aed; color: #fff; border: none; border-radius: 10px;
-    padding: 14px; font-size: 1.1rem; width: 100%; cursor: pointer; font-weight: 600;
-    transition: background 0.2s, opacity 0.2s, transform 0.1s; margin-top: 4px;
-  }
-  .diff-start-btn:hover:not(:disabled) { background: #6d28d9; }
-  .diff-start-btn:active { transform: scale(0.98); }
-  .diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.start-icon { font-size: 3rem; text-align: center; margin-bottom: 16px; }
+.features { list-style: none; color: #888; font-size: 0.9rem; margin-bottom: 28px; text-align: center; line-height: 2; }
 
-  /* Quiz */
-  .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .q-counter     { color: #888; font-size: 0.9rem; }
-  .score-display { color: #a78bfa; font-weight: bold; }
-  .timer-wrap    { display: flex; align-items: center; gap: 8px; }
-  #timer { font-size: 1.4rem; font-weight: bold; color: #34d399; min-width: 36px; text-align: right; transition: color 0.3s; }
-  #timer.danger { color: #f87171; }
-  .timer-label { color: #888; font-size: 0.85rem; }
-  .diff-indicator { text-align: center; font-size: 0.78rem; font-weight: 600; margin-bottom: 10px; letter-spacing: 0.04em; }
-  .progress-bar  { height: 4px; background: #1e1e30; border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
-  .progress-fill { height: 100%; background: #7c3aed; transition: width 0.4s ease; }
-  .question-card { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-  .question-text { font-size: 1.15rem; line-height: 1.6; }
-  .choices       { display: flex; flex-direction: column; gap: 10px; }
-  .choice-btn {
-    background: #1a1a2e; border: 2px solid #2d2d4e; color: #e0e0e0;
-    border-radius: 10px; padding: 14px 18px; font-size: 1rem;
-    cursor: pointer; text-align: left; transition: border-color 0.2s, background 0.2s;
-  }
-  .choice-btn:hover:not(:disabled) { border-color: #7c3aed; background: #22223a; }
-  .choice-btn.correct { border-color: #34d399; background: #064e3b22; color: #34d399; }
-  .choice-btn.wrong   { border-color: #f87171; background: #7f1d1d22; color: #f87171; }
-  .choice-btn:disabled { cursor: default; }
-  .feedback { text-align: center; font-size: 0.95rem; min-height: 28px; margin-top: 12px; font-weight: 600; line-height: 1.5; }
-  .feedback.correct { color: #34d399; }
-  .feedback.wrong   { color: #f87171; }
+.diff-title { text-align: center; font-size: 1.5rem; font-weight: 700; color: #a78bfa; margin-bottom: 8px; }
+.diff-sub   { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 28px; }
+.diff-cards { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.diff-card {
+  background: #1a1a2e; border: 2px solid #2d2d4e; border-radius: 14px;
+  padding: 20px 22px; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  display: flex; align-items: center; gap: 18px;
+}
+.diff-card:hover  { background: #22223a; transform: translateY(-2px); }
+.diff-card:active { transform: scale(0.98); }
+.diff-card.selected { border-color: var(--dc); background: var(--db); }
+.diff-card[data-diff="easy"]   { --dc:#34d399; --db:#064e3b18; }
+.diff-card[data-diff="smart"]  { --dc:#60a5fa; --db:#1e3a5f18; }
+.diff-card[data-diff="genius"] { --dc:#f87171; --db:#7f1d1d18; }
+.diff-icon { font-size: 2.2rem; flex-shrink: 0; }
+.diff-info { flex: 1; }
+.diff-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+.diff-card[data-diff="easy"]   .diff-name { color: #34d399; }
+.diff-card[data-diff="smart"]  .diff-name { color: #60a5fa; }
+.diff-card[data-diff="genius"] .diff-name { color: #f87171; }
+.diff-desc { font-size: 0.85rem; color: #888; line-height: 1.4; }
+.diff-ai-score {
+  font-size: 0.78rem; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px; flex-shrink: 0; white-space: nowrap;
+}
+.diff-card[data-diff="easy"]   .diff-ai-score { background:#34d39918; color:#34d399; border:1px solid #34d39944; }
+.diff-card[data-diff="smart"]  .diff-ai-score { background:#60a5fa18; color:#60a5fa; border:1px solid #60a5fa44; }
+.diff-card[data-diff="genius"] .diff-ai-score { background:#f8717118; color:#f87171; border:1px solid #f8717144; }
 
-  /* Result */
-  .result-card {
-    background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 14px;
-    padding: 32px 24px 28px; text-align: center; margin-bottom: 16px;
-  }
-  .streak-milestone {
-    display: none; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #78350f44, #92400e44);
-    border: 1px solid #fb923c66; border-radius: 10px;
-    padding: 10px 16px; margin-bottom: 18px;
-    font-size: 0.9rem; color: #fb923c; font-weight: 600; gap: 8px;
-  }
-  .streak-milestone.show { display: flex; }
-  .diff-result-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 14px; border-radius: 20px; font-size: 0.8rem;
-    font-weight: 700; letter-spacing: 0.04em; margin-bottom: 14px; border: 1px solid;
-  }
-  .drb-easy   { background: #34d39918; color: #34d399; border-color: #34d39944; }
-  .drb-smart  { background: #60a5fa18; color: #60a5fa; border-color: #60a5fa44; }
-  .drb-genius { background: #f8717118; color: #f87171; border-color: #f8717144; }
-  .perf-tier {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 8px 22px; border-radius: 50px; font-size: 1rem;
-    font-weight: 700; letter-spacing: 0.04em; margin-bottom: 18px; border: 2px solid;
-  }
-  .tier-5 { background: #fef08a18; color: #fde047; border-color: #fde047; }
-  .tier-4 { background: #a78bfa18; color: #a78bfa; border-color: #a78bfa; }
-  .tier-3 { background: #34d39918; color: #34d399; border-color: #34d399; }
-  .tier-2 { background: #60a5fa18; color: #60a5fa; border-color: #60a5fa; }
-  .tier-1 { background: #f8717118; color: #f87171; border-color: #f87171; }
-  .result-emoji { font-size: 3.2rem; margin-bottom: 10px; }
-  .result-title { font-size: 1.5rem; color: #a78bfa; margin-bottom: 18px; }
-  .verdict-banner {
-    display: inline-block; padding: 10px 28px; border-radius: 50px;
-    font-size: 1.05rem; font-weight: 700; margin-bottom: 26px; letter-spacing: 0.03em;
-  }
-  .verdict-win  { background: #064e3b44; color: #34d399; border: 2px solid #34d399; }
-  .verdict-tie  { background: #1e3a5f44; color: #60a5fa; border: 2px solid #60a5fa; }
-  .verdict-lose { background: #7f1d1d44; color: #f87171; border: 2px solid #f87171; }
-  .score-comparison {
-    display: flex; justify-content: center; align-items: stretch;
-    margin-bottom: 22px; border-radius: 12px; overflow: hidden; border: 1px solid #2d2d4e;
-  }
-  .score-side {
-    flex: 1; padding: 20px 12px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-  }
-  .score-side.ai-side   { background: #12122a; border-right: 1px solid #2d2d4e; }
-  .score-side.user-side { background: #12122a; }
-  .score-side .avatar    { font-size: 2rem; }
-  .score-side .label     { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
-  .score-side .big-score { font-size: 2.8rem; font-weight: 800; line-height: 1; }
-  .score-side .fraction  { font-size: 0.85rem; color: #666; }
-  .ai-side   .big-score  { color: #f87171; }
-  .user-side .big-score  { color: #34d399; }
-  .vs-divider {
-    display: flex; align-items: center; justify-content: center;
-    background: #0f0f1a; padding: 0 4px; font-size: 0.75rem;
-    font-weight: 700; color: #555; min-width: 32px;
-    border-left: 1px solid #2d2d4e; border-right: 1px solid #2d2d4e;
-  }
-  .bar-wrap { width: 100%; padding: 0 24px; margin-bottom: 10px; }
-  .bar-row  { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .bar-row-label { font-size: 0.78rem; color: #888; width: 32px; text-align: right; flex-shrink: 0; }
-  .bar-track { flex: 1; height: 10px; background: #1e1e30; border-radius: 6px; overflow: hidden; }
-  .bar-fill  { height: 100%; border-radius: 6px; transition: width 1s ease; width: 0; }
-  .bar-fill.ai-bar   { background: #f87171; }
-  .bar-fill.user-bar { background: #34d399; }
-  .bar-score-label { font-size: 0.78rem; font-weight: 700; width: 28px; flex-shrink: 0; }
-  .bar-score-label.ai-label   { color: #f87171; }
-  .bar-score-label.user-label { color: #34d399; }
-  .result-verdict { color: #aaa; font-size: 0.9rem; line-height: 1.6; padding: 0 8px; }
+.hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.q-counter     { color: #888; font-size: 0.9rem; }
+.score-display { color: #a78bfa; font-weight: bold; }
+.timer-wrap    { display: flex; align-items: center; gap: 8px; }
+#timer { font-size: 1.4rem; font-weight: bold; color: #34d399; min-width: 36px; text-align: right; transition: color 0.3s; }
+#timer.danger { color: #f87171; }
+.timer-label { color: #888; font-size: 0.85rem; }
+.diff-indicator { text-align: center; font-size: 0.78rem; font-weight: 600; margin-bottom: 10px; letter-spacing: 0.04em; }
+.progress-bar  { height: 4px; background: #1e1e30; border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
+.progress-fill { height: 100%; background: #7c3aed; transition: width 0.4s ease; width: 0%; }
+.question-card { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+.question-text { font-size: 1.15rem; line-height: 1.6; }
+.choices { display: flex; flex-direction: column; gap: 10px; }
+.choice-btn {
+  background: #1a1a2e; border: 2px solid #2d2d4e; color: #e0e0e0;
+  border-radius: 10px; padding: 14px 18px; font-size: 1rem;
+  cursor: pointer; text-align: left; transition: border-color 0.2s, background 0.2s;
+  font-family: inherit; width: 100%;
+}
+.choice-btn:hover:not(:disabled) { border-color: #7c3aed; background: #22223a; }
+.choice-btn.correct { border-color: #34d399; background: #064e3b22; color: #34d399; }
+.choice-btn.wrong   { border-color: #f87171; background: #7f1d1d22; color: #f87171; }
+.choice-btn:disabled { cursor: default; }
+.feedback { text-align: center; font-size: 0.95rem; min-height: 40px; margin-top: 12px; font-weight: 600; line-height: 1.5; }
+.feedback.correct { color: #34d399; }
+.feedback.wrong   { color: #f87171; }
 
-  /* Start screen */
-  .start-icon { font-size: 3rem; text-align: center; margin-bottom: 16px; }
-  .features { list-style: none; color: #888; font-size: 0.9rem; margin-bottom: 28px; text-align: center; line-height: 2; }
+.result-card {
+  background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 14px;
+  padding: 32px 24px 28px; text-align: center; margin-bottom: 16px;
+}
+.streak-milestone {
+  display: none; align-items: center; justify-content: center;
+  background: linear-gradient(135deg,#78350f44,#92400e44);
+  border: 1px solid #fb923c66; border-radius: 10px;
+  padding: 10px 16px; margin-bottom: 18px;
+  font-size: 0.9rem; color: #fb923c; font-weight: 600; gap: 8px;
+}
+.streak-milestone.show { display: flex; }
+.diff-result-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 20px; font-size: 0.8rem;
+  font-weight: 700; letter-spacing: 0.04em; margin-bottom: 14px; border: 1px solid;
+}
+.drb-easy   { background:#34d39918; color:#34d399; border-color:#34d39944; }
+.drb-smart  { background:#60a5fa18; color:#60a5fa; border-color:#60a5fa44; }
+.drb-genius { background:#f8717118; color:#f87171; border-color:#f8717144; }
+.perf-tier {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 22px; border-radius: 50px; font-size: 1rem;
+  font-weight: 700; letter-spacing: 0.04em; margin-bottom: 18px; border: 2px solid;
+}
+.tier-5 { background:#fef08a18; color:#fde047; border-color:#fde047; }
+.tier-4 { background:#a78bfa18; color:#a78bfa; border-color:#a78bfa; }
+.tier-3 { background:#34d39918; color:#34d399; border-color:#34d399; }
+.tier-2 { background:#60a5fa18; color:#60a5fa; border-color:#60a5fa; }
+.tier-1 { background:#f8717118; color:#f87171; border-color:#f87171; }
+.result-emoji { font-size: 3.2rem; margin-bottom: 10px; }
+.result-title { font-size: 1.5rem; color: #a78bfa; margin-bottom: 18px; }
+.verdict-banner {
+  display: inline-block; padding: 10px 28px; border-radius: 50px;
+  font-size: 1.05rem; font-weight: 700; margin-bottom: 26px; letter-spacing: 0.03em;
+}
+.verdict-win  { background:#064e3b44; color:#34d399; border:2px solid #34d399; }
+.verdict-tie  { background:#1e3a5f44; color:#60a5fa; border:2px solid #60a5fa; }
+.verdict-lose { background:#7f1d1d44; color:#f87171; border:2px solid #f87171; }
+.score-comparison {
+  display: flex; justify-content: center; align-items: stretch;
+  margin-bottom: 22px; border-radius: 12px; overflow: hidden; border: 1px solid #2d2d4e;
+}
+.score-side { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.score-side.ai-side   { background: #12122a; border-right: 1px solid #2d2d4e; }
+.score-side.user-side { background: #12122a; }
+.score-side .avatar    { font-size: 2rem; }
+.score-side .label     { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
+.score-side .big-score { font-size: 2.8rem; font-weight: 800; line-height: 1; }
+.score-side .fraction  { font-size: 0.85rem; color: #666; }
+.ai-side   .big-score  { color: #f87171; }
+.user-side .big-score  { color: #34d399; }
+.vs-divider {
+  display: flex; align-items: center; justify-content: center;
+  background: #0f0f1a; padding: 0 4px; font-size: 0.75rem; font-weight: 700;
+  color: #555; min-width: 32px; border-left: 1px solid #2d2d4e; border-right: 1px solid #2d2d4e;
+}
+.bar-wrap { width: 100%; padding: 0 24px; margin-bottom: 10px; }
+.bar-row  { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.bar-row-label { font-size: 0.78rem; color: #888; width: 32px; text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 10px; background: #1e1e30; border-radius: 6px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 6px; transition: width 1s ease; width: 0; }
+.bar-fill.ai-bar   { background: #f87171; }
+.bar-fill.user-bar { background: #34d399; }
+.bar-score-label { font-size: 0.78rem; font-weight: 700; width: 28px; flex-shrink: 0; }
+.bar-score-label.ai-label   { color: #f87171; }
+.bar-score-label.user-label { color: #34d399; }
+.result-verdict { color: #aaa; font-size: 0.9rem; line-height: 1.6; padding: 0 8px; }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Streak Bar (always visible) -->
   <div class="streak-bar">
     <span class="streak-flame">🔥</span>
     <span class="streak-text">Current Streak:</span>
@@ -226,7 +212,7 @@
     <span class="streak-text">Days</span>
   </div>
 
-  <!-- Start Screen -->
+  <!-- START -->
   <div class="screen active" id="screen-start">
     <div class="start-icon">🧠</div>
     <h1>Are You Smarter Than AI?</h1>
@@ -236,10 +222,10 @@
       <li>🔢 5 brain-bending questions</li>
       <li>🏆 Score tracked in real time</li>
     </ul>
-    <button class="btn" id="btn-go-difficulty">Choose Difficulty</button>
+    <button type="button" class="btn" id="btn-go-difficulty">Choose Difficulty</button>
   </div>
 
-  <!-- Difficulty Screen -->
+  <!-- DIFFICULTY -->
   <div class="screen" id="screen-difficulty">
     <div class="diff-title">⚙️ Select Difficulty</div>
     <div class="diff-sub">How smart is the AI you're up against?</div>
@@ -269,11 +255,11 @@
         <div class="diff-ai-score">AI scores 4–5</div>
       </div>
     </div>
-    <button class="diff-start-btn" id="btn-start-quiz" disabled>Select a difficulty to continue</button>
-    <button class="btn outline" id="btn-back-to-start" style="margin-top:10px;">← Back</button>
+    <button type="button" class="diff-start-btn" id="btn-start-quiz" disabled>Select a difficulty to continue</button>
+    <button type="button" class="btn outline" id="btn-back-to-start" style="margin-top:10px;">← Back</button>
   </div>
 
-  <!-- Quiz Screen -->
+  <!-- QUIZ -->
   <div class="screen" id="screen-quiz">
     <div class="hud">
       <span class="q-counter" id="q-counter">Question 1 of 5</span>
@@ -292,7 +278,7 @@
     <p class="feedback" id="feedback"></p>
   </div>
 
-  <!-- Result Screen -->
+  <!-- RESULT -->
   <div class="screen" id="screen-result">
     <div class="result-card">
       <div class="streak-milestone" id="streak-milestone"></div>
@@ -330,57 +316,54 @@
       </div>
       <p class="result-verdict" id="result-verdict"></p>
     </div>
-    <button class="btn share-btn" id="btn-share">
+    <button type="button" class="btn share-btn" id="btn-share">
       <span class="share-icon">📤</span>
       <span id="share-label">Share Your Score</span>
     </button>
-    <button class="btn" id="btn-play-again">Play Again</button>
-    <button class="btn outline" id="btn-home">Back to Home</button>
+    <button type="button" class="btn" id="btn-play-again">Play Again</button>
+    <button type="button" class="btn outline" id="btn-home">Back to Home</button>
   </div>
 
-</div><!-- /container -->
+</div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-  /* ───────────────────────────
-     SCREEN MANAGER
-  ─────────────────────────── */
-  var allScreens = document.querySelectorAll('.screen');
+  /* ── Screens ── */
   function showScreen(id) {
-    allScreens.forEach(function (s) { s.classList.remove('active'); });
-    document.getElementById(id).classList.add('active');
+    document.querySelectorAll(".screen").forEach(function (s) {
+      s.classList.remove("active");
+    });
+    document.getElementById(id).classList.add("active");
   }
 
-  /* ───────────────────────────
-     STREAK
-  ─────────────────────────── */
-  var STREAK_KEY = 'aysai_streak';
-  var DATE_KEY   = 'aysai_last_played';
+  /* ── Streak ── */
+  var STREAK_KEY = "aysai_streak";
+  var DATE_KEY   = "aysai_last_played";
 
   function todayStr() {
     var d = new Date();
-    return d.getFullYear() + '-' +
-           String(d.getMonth() + 1).padStart(2, '0') + '-' +
-           String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
   }
 
   function daysBetween(a, b) {
     return Math.round((new Date(b) - new Date(a)) / 86400000);
   }
 
-  function readStreak()     { return parseInt(localStorage.getItem(STREAK_KEY) || '0', 10); }
-  function writeStreak(v)   { localStorage.setItem(STREAK_KEY, String(v)); }
-  function readLastDate()   { return localStorage.getItem(DATE_KEY) || ''; }
-  function writeLastDate(d) { localStorage.setItem(DATE_KEY, d); }
+  function readStreak()    { return parseInt(localStorage.getItem(STREAK_KEY) || "0", 10); }
+  function writeStreak(v)  { localStorage.setItem(STREAK_KEY, String(v)); }
+  function readLastDate()  { return localStorage.getItem(DATE_KEY) || ""; }
+  function writeLastDate(d){ localStorage.setItem(DATE_KEY, d); }
 
   function renderStreakBadge(n, highlight) {
-    var el = document.getElementById('streak-count');
+    var el = document.getElementById("streak-count");
     el.textContent = n;
-    el.className = 'streak-count' + (highlight ? ' streak-new' : '');
+    el.className = "streak-count" + (highlight ? " streak-new" : "");
     if (highlight) {
-      el.addEventListener('animationend', function () {
-        el.classList.remove('streak-new');
+      el.addEventListener("animationend", function () {
+        el.classList.remove("streak-new");
       }, { once: true });
     }
   }
@@ -391,57 +374,76 @@ document.addEventListener('DOMContentLoaded', function () {
     var streak   = readStreak();
     var isNew    = false;
     var wasReset = false;
-
     if (!last) {
       streak = 1; isNew = true;
     } else if (last === today) {
-      /* already played today – no change */
+      /* no change */
     } else {
       var diff = daysBetween(last, today);
       if (diff === 1) { streak += 1; isNew = true; }
       else            { streak = 1;  wasReset = true; }
     }
-
     writeStreak(streak);
     writeLastDate(today);
     renderStreakBadge(streak, isNew);
     return { streak: streak, isNew: isNew, wasReset: wasReset };
   }
 
-  /* init display (read-only) */
+  /* init display */
   (function () {
-    var streak = readStreak();
-    var last   = readLastDate();
-    var today  = todayStr();
-    if (!last || (last !== today && daysBetween(last, today) > 1)) streak = 0;
-    renderStreakBadge(streak, false);
+    var s    = readStreak();
+    var last = readLastDate();
+    var today = todayStr();
+    if (!last || (last !== today && daysBetween(last, today) > 1)) s = 0;
+    renderStreakBadge(s, false);
   }());
 
-  /* ───────────────────────────
-     DIFFICULTY CONFIG
-  ─────────────────────────── */
+  /* ── Difficulty ── */
   var DIFF = {
-    easy:   { label: 'Easy AI',   icon: '🟢', badgeCls: 'drb-easy',   color: '#34d399', aiMin: 1, aiMax: 2 },
-    smart:  { label: 'Smart AI',  icon: '🔵', badgeCls: 'drb-smart',  color: '#60a5fa', aiMin: 3, aiMax: 4 },
-    genius: { label: 'Genius AI', icon: '🔴', badgeCls: 'drb-genius', color: '#f87171', aiMin: 4, aiMax: 5 }
+    easy:   { label:"Easy AI",   icon:"🟢", badgeCls:"drb-easy",   color:"#34d399", aiMin:1, aiMax:2 },
+    smart:  { label:"Smart AI",  icon:"🔵", badgeCls:"drb-smart",  color:"#60a5fa", aiMin:3, aiMax:4 },
+    genius: { label:"Genius AI", icon:"🔴", badgeCls:"drb-genius", color:"#f87171", aiMin:4, aiMax:5 }
   };
-  var selectedDiff = '';
+  var selectedDiff = "";
 
-  /* ───────────────────────────
-     QUESTIONS
-  ─────────────────────────── */
+  /* ── Questions ── */
   var questions = [
     {
-      q: 'A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?',
-      choices: ['$0.10', '$0.05', '$0.15', '$0.20'],
+      q: "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?",
+      choices: ["$0.10","$0.05","$0.15","$0.20"],
       answer: 1,
-      explain: 'The ball costs $0.05. Bat = $1.05, Ball = $0.05. Total = $1.10 ✓'
+      explain: "The ball costs $0.05. Bat = $1.05, Ball = $0.05. Total = $1.10 ✓"
     },
     {
-      q: 'If it takes 5 machines 5 minutes to make 5 widgets, how long does it take 100 machines to make 100 widgets?',
-      choices: ['100 minutes', '50 minutes', '5 minutes', '1 minute'],
+      q: "If it takes 5 machines 5 minutes to make 5 widgets, how long does it take 100 machines to make 100 widgets?",
+      choices: ["100 minutes","50 minutes","5 minutes","1 minute"],
       answer: 2,
-      explain: 'Each machine makes 1 widget in 5 minutes. 100 machines make 100 widgets in 5 minutes.'
+      explain: "Each machine makes 1 widget in 5 minutes. 100 machines make 100 widgets in 5 minutes."
     },
     {
-      q: 'In a lake, there is a patch of lily pads. Every day the patch doubles in size. If it takes 48 days to 
+      q: "In a lake there is a patch of lily pads. Every day the patch doubles. If it takes 48 days to cover the whole lake, how long to cover half?",
+      choices: ["24 days","36 days","47 days","12 days"],
+      answer: 2,
+      explain: "Since it doubles daily, half the lake was covered just one day before — day 47."
+    },
+    {
+      q: "What is the next number in this sequence? 1, 11, 21, 1211, 111221, ?",
+      choices: ["222231","312211","1112221","1234321"],
+      answer: 1,
+      explain: "Look-and-Say: one 3, one 1, two 2s, two 1s → 312211."
+    },
+    {
+      q: "You have a 3-litre jug and a 5-litre jug. How do you measure exactly 4 litres?",
+      choices: [
+        "Fill 5L, pour into 3L, empty 3L, pour rest into 3L, refill 5L, top up 3L",
+        "Fill 3L into 5L. Refill 3L, pour into 5L (1L left). Empty 5L, add 1L, refill 3L, pour in → 4L",
+        "It is impossible with these two jugs",
+        "Fill the 5L halfway"
+      ],
+      answer: 1,
+      explain: "Fill 3L, pour into 5L. Refill 3L, top off 5L (1L stays). Empty 5L, pour 1L in, add full 3L → 4L!"
+    }
+  ];
+
+  var perfTiers = [
+    { max:1, icon:"☕", label:"Needs More Coffee",       cls:"tier-1" },
