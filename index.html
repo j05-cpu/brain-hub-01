@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +21,50 @@
   .screen { display: none; }
   .screen.active { display: block; }
 
+  /* Streak Bar */
+  .streak-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #1a1a2e;
+    border: 1px solid #2d2d4e;
+    border-radius: 50px;
+    padding: 10px 22px;
+    margin-bottom: 24px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .streak-flame { font-size: 1.3rem; animation: flicker 1.4s ease-in-out infinite alternate; }
+  @keyframes flicker {
+    0%   { transform: scale(1)    rotate(-3deg); }
+    50%  { transform: scale(1.12) rotate(2deg);  }
+    100% { transform: scale(1.05) rotate(-1deg); }
+  }
+  .streak-text { font-size: 0.95rem; color: #aaa; }
+  .streak-count {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #fb923c;
+    background: #fb923c18;
+    border: 1px solid #fb923c44;
+    border-radius: 20px;
+    padding: 2px 12px;
+    min-width: 36px;
+    text-align: center;
+  }
+  .streak-count.streak-new {
+    color: #fde047;
+    border-color: #fde04766;
+    background: #fde04718;
+    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes pop {
+    0%   { transform: scale(0.7); opacity: 0.5; }
+    100% { transform: scale(1);   opacity: 1;   }
+  }
+
   h1 { text-align: center; font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
   .subtitle { text-align: center; color: #888; margin-bottom: 32px; font-size: 0.95rem; }
 
@@ -32,9 +76,7 @@
   }
   .btn:hover { background: #6d28d9; }
   .btn:active { transform: scale(0.98); }
-  .btn.outline {
-    background: transparent; border: 2px solid #7c3aed; color: #a78bfa;
-  }
+  .btn.outline { background: transparent; border: 2px solid #7c3aed; color: #a78bfa; }
   .btn.outline:hover { background: #1a1a2e; }
   .btn.share-btn {
     background: linear-gradient(135deg, #0ea5e9, #6366f1);
@@ -42,9 +84,7 @@
     font-size: 1.05rem; font-weight: 700; letter-spacing: 0.02em;
   }
   .btn.share-btn:hover { background: linear-gradient(135deg, #0284c7, #4f46e5); }
-  .btn.share-btn.copied {
-    background: linear-gradient(135deg, #059669, #0d9488);
-  }
+  .btn.share-btn.copied { background: linear-gradient(135deg, #059669, #0d9488); }
   .share-icon { font-size: 1.2rem; line-height: 1; }
 
   /* Quiz HUD */
@@ -70,12 +110,12 @@
   }
   .choice-btn:hover:not(:disabled) { border-color: #7c3aed; background: #22223a; }
   .choice-btn.correct { border-color: #34d399; background: #064e3b22; color: #34d399; }
-  .choice-btn.wrong { border-color: #f87171; background: #7f1d1d22; color: #f87171; }
+  .choice-btn.wrong   { border-color: #f87171; background: #7f1d1d22; color: #f87171; }
   .choice-btn:disabled { cursor: default; }
 
   .feedback { text-align: center; font-size: 1rem; min-height: 28px; margin-top: 12px; font-weight: 600; }
   .feedback.correct { color: #34d399; }
-  .feedback.wrong { color: #f87171; }
+  .feedback.wrong   { color: #f87171; }
 
   /* Result Screen */
   .result-card {
@@ -83,6 +123,22 @@
     border-radius: 14px; padding: 32px 24px 28px;
     text-align: center; margin-bottom: 16px;
   }
+
+  /* Streak milestone toast inside result */
+  .streak-milestone {
+    display: none;
+    align-items: center; justify-content: center; gap-8px;
+    background: linear-gradient(135deg, #78350f44, #92400e44);
+    border: 1px solid #fb923c66;
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 18px;
+    font-size: 0.9rem;
+    color: #fb923c;
+    font-weight: 600;
+    gap: 8px;
+  }
+  .streak-milestone.show { display: flex; }
 
   .perf-tier {
     display: inline-flex; align-items: center; gap: 8px;
@@ -109,7 +165,7 @@
 
   .score-comparison {
     display: flex; justify-content: center; align-items: stretch;
-    gap: 0; margin-bottom: 22px; border-radius: 12px;
+    margin-bottom: 22px; border-radius: 12px;
     overflow: hidden; border: 1px solid #2d2d4e;
   }
   .score-side {
@@ -153,6 +209,14 @@
 <body>
 <div class="container">
 
+  <!-- Streak Bar (always visible) -->
+  <div class="streak-bar" id="streak-bar">
+    <span class="streak-flame">🔥</span>
+    <span class="streak-text">Current Streak:</span>
+    <span class="streak-count" id="streak-count">1</span>
+    <span class="streak-text">Days</span>
+  </div>
+
   <!-- Start Screen -->
   <div class="screen active" id="start-screen">
     <div class="start-icon">🧠</div>
@@ -187,6 +251,7 @@
   <!-- Result Screen -->
   <div class="screen" id="result-screen">
     <div class="result-card">
+      <div class="streak-milestone" id="streak-milestone"></div>
       <div class="perf-tier" id="perf-tier"></div>
       <div class="result-emoji" id="result-emoji"></div>
       <div class="result-title" id="result-title"></div>
@@ -237,6 +302,99 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
+  /* ── Streak Logic ── */
+  const STREAK_KEY     = 'aysai_streak';
+  const LAST_PLAYED_KEY = 'aysai_last_played';
+
+  function getTodayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function getDaysBetween(dateStrA, dateStrB) {
+    const a = new Date(dateStrA);
+    const b = new Date(dateStrB);
+    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  }
+
+  function loadStreak() {
+    return parseInt(localStorage.getItem(STREAK_KEY) || '0', 10);
+  }
+
+  function saveStreak(val) {
+    localStorage.setItem(STREAK_KEY, String(val));
+  }
+
+  function getLastPlayed() {
+    return localStorage.getItem(LAST_PLAYED_KEY) || null;
+  }
+
+  function saveLastPlayed(dateStr) {
+    localStorage.setItem(LAST_PLAYED_KEY, dateStr);
+  }
+
+  // Calculate and update streak when a game finishes. Returns {streak, isNew, wasReset}
+  function updateStreak() {
+    const today      = getTodayStr();
+    const lastPlayed = getLastPlayed();
+    let streak       = loadStreak();
+    let isNew        = false;
+    let wasReset     = false;
+
+    if (!lastPlayed) {
+      // First time ever
+      streak  = 1;
+      isNew   = true;
+    } else if (lastPlayed === today) {
+      // Already played today — don't change streak
+    } else {
+      const diff = getDaysBetween(lastPlayed, today);
+      if (diff === 1) {
+        // Consecutive day
+        streak++;
+        isNew = true;
+      } else {
+        // Missed one or more days
+        streak   = 1;
+        wasReset = true;
+      }
+    }
+
+    saveStreak(streak);
+    saveLastPlayed(today);
+    renderStreakBar(streak, isNew);
+    return { streak, isNew, wasReset };
+  }
+
+  function renderStreakBar(streak, highlight) {
+    const countEl = document.getElementById('streak-count');
+    countEl.textContent = streak;
+    countEl.className   = 'streak-count' + (highlight ? ' streak-new' : '');
+    // Remove animation class after it plays so it can re-trigger
+    if (highlight) {
+      countEl.addEventListener('animationend', function () {
+        countEl.classList.remove('streak-new');
+      }, { once: true });
+    }
+  }
+
+  // Init streak display on load (read-only, no update)
+  (function initStreakDisplay() {
+    const streak     = loadStreak();
+    const lastPlayed = getLastPlayed();
+    const today      = getTodayStr();
+    let displayStreak = streak;
+
+    if (lastPlayed && lastPlayed !== today) {
+      const diff = getDaysBetween(lastPlayed, today);
+      if (diff > 1) displayStreak = 0; // streak is broken, show 0 until they play
+    }
+    if (!lastPlayed) displayStreak = 0;
+
+    document.getElementById('streak-count').textContent = displayStreak;
+  })();
+
+  /* ── Questions ── */
   const questions = [
     {
       q: "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?",
@@ -301,16 +459,13 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('restart-btn').addEventListener('click', startQuiz);
   document.getElementById('home-btn').addEventListener('click', () => showScreen('start'));
 
-  // Share button
+  /* Share button */
   const shareBtn     = document.getElementById('share-btn');
   const shareBtnText = document.getElementById('share-btn-text');
 
   shareBtn.addEventListener('click', function () {
     if (navigator.share) {
-      navigator.share({
-        title: 'Are You Smarter Than AI?',
-        text: finalShareText
-      }).catch(function () {});
+      navigator.share({ title: 'Are You Smarter Than AI?', text: finalShareText }).catch(function () {});
     } else {
       navigator.clipboard.writeText(finalShareText).then(function () {
         shareBtnText.textContent = 'Score Copied!';
@@ -368,116 +523,4 @@ document.addEventListener('DOMContentLoaded', function () {
       timerEl.textContent = timeLeft;
       timerEl.className = timeLeft <= 10 ? 'danger' : '';
       if (timeLeft <= 0) { clearInterval(timer); if (!answered) timeUp(); }
-    }, 1000);
-  }
-
-  function timeUp() {
-    answered = true;
-    disableChoices();
-    const q = questions[currentQ];
-    document.querySelectorAll('.choice-btn')[q.answer].classList.add('correct');
-    const fb = document.getElementById('feedback');
-    fb.textContent = "⏱ Time's up! " + q.explain;
-    fb.className = 'feedback wrong';
-    setTimeout(nextQuestion, 2800);
-  }
-
-  function selectAnswer(index) {
-    if (answered) return;
-    answered = true;
-    clearInterval(timer);
-    const q = questions[currentQ];
-    disableChoices();
-    const fb = document.getElementById('feedback');
-    if (index === q.answer) {
-      score++;
-      document.querySelectorAll('.choice-btn')[index].classList.add('correct');
-      fb.textContent = '✅ Correct! ' + q.explain;
-      fb.className = 'feedback correct';
-    } else {
-      document.querySelectorAll('.choice-btn')[index].classList.add('wrong');
-      document.querySelectorAll('.choice-btn')[q.answer].classList.add('correct');
-      fb.textContent = '❌ Wrong! ' + q.explain;
-      fb.className = 'feedback wrong';
-    }
-    document.getElementById('score-display').textContent = `Score: ${score}`;
-    setTimeout(nextQuestion, 2800);
-  }
-
-  function disableChoices() {
-    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
-  }
-
-  function nextQuestion() {
-    currentQ++;
-    if (currentQ < questions.length) loadQuestion();
-    else showResult();
-  }
-
-  function showResult() {
-    // Reset share button state
-    shareBtnText.textContent = 'Share Your Score';
-    shareBtn.classList.remove('copied');
-    shareBtn.querySelector('.share-icon').textContent = '📤';
-
-    showScreen('result');
-
-    const aiScore   = Math.floor(Math.random() * 3) + 3;
-    const userScore = score;
-
-    // Build share text
-    const tier = perfTiers.find(t => userScore <= t.max) || perfTiers[perfTiers.length - 1];
-    finalShareText = `I scored ${userScore}/5 in "Are You Smarter Than AI?" — earning the rank of "${tier.label}"! Can you beat me? 🧠`;
-
-    // Performance tier badge
-    const perfEl = document.getElementById('perf-tier');
-    perfEl.className = 'perf-tier ' + tier.cls;
-    perfEl.innerHTML = `<span>${tier.icon}</span><span>${tier.label}</span>`;
-
-    // Scores
-    document.getElementById('ai-big-score').textContent   = aiScore;
-    document.getElementById('user-big-score').textContent = userScore;
-    document.getElementById('ai-bar-label').textContent   = aiScore + '/5';
-    document.getElementById('user-bar-label').textContent = userScore + '/5';
-
-    // Animate bars
-    setTimeout(() => {
-      document.getElementById('ai-bar').style.width   = (aiScore   / 5 * 100) + '%';
-      document.getElementById('user-bar').style.width = (userScore / 5 * 100) + '%';
-    }, 150);
-
-    // Win / tie / lose
-    let emoji, title, verdictClass, verdictText, blurb;
-    if (userScore > aiScore) {
-      emoji        = '🏆';
-      title        = 'You Beat the AI!';
-      verdictClass = 'verdict-win';
-      verdictText  = '🎉 You beat AI!';
-      blurb        = `You scored ${userScore}/5 while the AI only managed ${aiScore}/5. Exceptional reasoning — you outperformed the machine!`;
-    } else if (userScore === aiScore) {
-      emoji        = '🤝';
-      title        = 'You Matched the AI!';
-      verdictClass = 'verdict-tie';
-      verdictText  = '🤝 You matched AI.';
-      blurb        = `Both you and the AI scored ${userScore}/5. A perfect tie — you think just like a machine. Try again to break the deadlock!`;
-    } else {
-      emoji        = '🤖';
-      title        = 'AI Wins This Round';
-      verdictClass = 'verdict-lose';
-      verdictText  = '🤖 AI wins this round.';
-      blurb        = `The AI scored ${aiScore}/5 versus your ${userScore}/5. These questions are designed to fool humans — don't give up, try again!`;
-    }
-
-    document.getElementById('result-emoji').textContent   = emoji;
-    document.getElementById('result-title').textContent   = title;
-    document.getElementById('result-verdict').textContent = blurb;
-
-    const banner = document.getElementById('verdict-banner');
-    banner.textContent = verdictText;
-    banner.className   = 'verdict-banner ' + verdictClass;
-  }
-
-});
-</script>
-</body>
-</html>
+   
