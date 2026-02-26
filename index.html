@@ -23,18 +23,10 @@
 
   /* Streak Bar */
   .streak-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: #1a1a2e;
-    border: 1px solid #2d2d4e;
-    border-radius: 50px;
-    padding: 10px 22px;
-    margin-bottom: 24px;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 50px;
+    padding: 10px 22px; margin-bottom: 24px;
+    width: fit-content; margin-left: auto; margin-right: auto;
   }
   .streak-flame { font-size: 1.3rem; animation: flicker 1.4s ease-in-out infinite alternate; }
   @keyframes flicker {
@@ -42,22 +34,14 @@
     50%  { transform: scale(1.12) rotate(2deg);  }
     100% { transform: scale(1.05) rotate(-1deg); }
   }
-  .streak-text { font-size: 0.95rem; color: #aaa; }
+  .streak-text  { font-size: 0.95rem; color: #aaa; }
   .streak-count {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #fb923c;
-    background: #fb923c18;
-    border: 1px solid #fb923c44;
-    border-radius: 20px;
-    padding: 2px 12px;
-    min-width: 36px;
-    text-align: center;
+    font-size: 1.05rem; font-weight: 800; color: #fb923c;
+    background: #fb923c18; border: 1px solid #fb923c44;
+    border-radius: 20px; padding: 2px 12px; min-width: 36px; text-align: center;
   }
   .streak-count.streak-new {
-    color: #fde047;
-    border-color: #fde04766;
-    background: #fde04718;
+    color: #fde047; border-color: #fde04766; background: #fde04718;
     animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   @keyframes pop {
@@ -87,6 +71,67 @@
   .btn.share-btn.copied { background: linear-gradient(135deg, #059669, #0d9488); }
   .share-icon { font-size: 1.2rem; line-height: 1; }
 
+  /* ── Difficulty Screen ── */
+  .diff-title {
+    text-align: center; font-size: 1.5rem; font-weight: 700;
+    color: #a78bfa; margin-bottom: 8px;
+  }
+  .diff-sub {
+    text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 28px;
+  }
+  .diff-cards { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+  .diff-card {
+    background: #1a1a2e; border: 2px solid #2d2d4e; border-radius: 14px;
+    padding: 20px 22px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    display: flex; align-items: center; gap: 18px; text-align: left;
+  }
+  .diff-card:hover { background: #22223a; transform: translateY(-2px); }
+  .diff-card.selected { border-color: var(--diff-color); background: var(--diff-bg); }
+  .diff-card:active { transform: scale(0.98); }
+
+  .diff-card[data-diff="easy"]   { --diff-color: #34d399; --diff-bg: #064e3b18; }
+  .diff-card[data-diff="smart"]  { --diff-color: #60a5fa; --diff-bg: #1e3a5f18; }
+  .diff-card[data-diff="genius"] { --diff-color: #f87171; --diff-bg: #7f1d1d18; }
+
+  .diff-icon { font-size: 2.2rem; flex-shrink: 0; }
+  .diff-info { flex: 1; }
+  .diff-name {
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;
+  }
+  .diff-card[data-diff="easy"]   .diff-name { color: #34d399; }
+  .diff-card[data-diff="smart"]  .diff-name { color: #60a5fa; }
+  .diff-card[data-diff="genius"] .diff-name { color: #f87171; }
+
+  .diff-desc { font-size: 0.85rem; color: #888; line-height: 1.4; }
+  .diff-ai-score {
+    font-size: 0.78rem; font-weight: 700; padding: 4px 10px;
+    border-radius: 20px; flex-shrink: 0; white-space: nowrap;
+  }
+  .diff-card[data-diff="easy"]   .diff-ai-score { background: #34d39918; color: #34d399; border: 1px solid #34d39944; }
+  .diff-card[data-diff="smart"]  .diff-ai-score { background: #60a5fa18; color: #60a5fa; border: 1px solid #60a5fa44; }
+  .diff-card[data-diff="genius"] .diff-ai-score { background: #f8717118; color: #f87171; border: 1px solid #f8717144; }
+
+  .diff-start-btn {
+    background: #7c3aed; color: #fff; border: none;
+    border-radius: 10px; padding: 14px; font-size: 1.1rem;
+    width: 100%; cursor: pointer; font-weight: 600;
+    transition: background 0.2s, opacity 0.2s, transform 0.1s;
+    margin-top: 4px;
+  }
+  .diff-start-btn:hover:not(:disabled) { background: #6d28d9; }
+  .diff-start-btn:active { transform: scale(0.98); }
+  .diff-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .diff-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .badge-easy   { background: #34d39922; color: #34d399; }
+  .badge-smart  { background: #60a5fa22; color: #60a5fa; }
+  .badge-genius { background: #f8717122; color: #f87171; }
+
   /* Quiz HUD */
   .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   .q-counter { color: #888; font-size: 0.9rem; }
@@ -95,6 +140,11 @@
   #timer { font-size: 1.4rem; font-weight: bold; color: #34d399; min-width: 36px; text-align: right; transition: color 0.3s; }
   #timer.danger { color: #f87171; }
   .timer-label { color: #888; font-size: 0.85rem; }
+
+  .diff-indicator {
+    text-align: center; font-size: 0.78rem; font-weight: 600;
+    margin-bottom: 10px; letter-spacing: 0.04em;
+  }
 
   .progress-bar { height: 4px; background: #1e1e30; border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
   .progress-fill { height: 100%; background: #7c3aed; transition: width 0.4s ease; }
@@ -117,28 +167,29 @@
   .feedback.correct { color: #34d399; }
   .feedback.wrong   { color: #f87171; }
 
-  /* Result Screen */
+  /* Result */
   .result-card {
     background: #1a1a2e; border: 1px solid #2d2d4e;
     border-radius: 14px; padding: 32px 24px 28px;
     text-align: center; margin-bottom: 16px;
   }
-
-  /* Streak milestone toast inside result */
   .streak-milestone {
-    display: none;
-    align-items: center; justify-content: center; gap-8px;
+    display: none; align-items: center; justify-content: center;
     background: linear-gradient(135deg, #78350f44, #92400e44);
-    border: 1px solid #fb923c66;
-    border-radius: 10px;
-    padding: 10px 16px;
-    margin-bottom: 18px;
-    font-size: 0.9rem;
-    color: #fb923c;
-    font-weight: 600;
-    gap: 8px;
+    border: 1px solid #fb923c66; border-radius: 10px;
+    padding: 10px 16px; margin-bottom: 18px;
+    font-size: 0.9rem; color: #fb923c; font-weight: 600; gap: 8px;
   }
   .streak-milestone.show { display: flex; }
+
+  .diff-result-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px; font-size: 0.8rem;
+    font-weight: 700; letter-spacing: 0.04em; margin-bottom: 14px; border: 1px solid;
+  }
+  .drb-easy   { background: #34d39918; color: #34d399; border-color: #34d39944; }
+  .drb-smart  { background: #60a5fa18; color: #60a5fa; border-color: #60a5fa44; }
+  .drb-genius { background: #f8717118; color: #f87171; border-color: #f8717144; }
 
   .perf-tier {
     display: inline-flex; align-items: center; gap: 8px;
@@ -165,8 +216,7 @@
 
   .score-comparison {
     display: flex; justify-content: center; align-items: stretch;
-    margin-bottom: 22px; border-radius: 12px;
-    overflow: hidden; border: 1px solid #2d2d4e;
+    margin-bottom: 22px; border-radius: 12px; overflow: hidden; border: 1px solid #2d2d4e;
   }
   .score-side {
     flex: 1; padding: 20px 12px;
@@ -209,11 +259,11 @@
 <body>
 <div class="container">
 
-  <!-- Streak Bar (always visible) -->
+  <!-- Streak Bar -->
   <div class="streak-bar" id="streak-bar">
     <span class="streak-flame">🔥</span>
     <span class="streak-text">Current Streak:</span>
-    <span class="streak-count" id="streak-count">1</span>
+    <span class="streak-count" id="streak-count">0</span>
     <span class="streak-text">Days</span>
   </div>
 
@@ -227,7 +277,47 @@
       <li>🔢 5 brain-bending questions</li>
       <li>🏆 Score tracked in real time</li>
     </ul>
-    <button class="btn" id="start-btn">Start Quiz</button>
+    <button class="btn" id="start-btn">Choose Difficulty</button>
+  </div>
+
+  <!-- Difficulty Screen -->
+  <div class="screen" id="difficulty-screen">
+    <div class="diff-title">⚙️ Select Difficulty</div>
+    <div class="diff-sub">How smart is the AI you're up against?</div>
+
+    <div class="diff-cards">
+
+      <div class="diff-card" data-diff="easy" tabindex="0" role="button" aria-pressed="false">
+        <div class="diff-icon">🟢</div>
+        <div class="diff-info">
+          <div class="diff-name">Easy AI</div>
+          <div class="diff-desc">A relaxed AI that makes mistakes. Great for warming up or casual play.</div>
+        </div>
+        <div class="diff-ai-score">AI scores 1–2</div>
+      </div>
+
+      <div class="diff-card" data-diff="smart" tabindex="0" role="button" aria-pressed="false">
+        <div class="diff-icon">🔵</div>
+        <div class="diff-info">
+          <div class="diff-name">Smart AI</div>
+          <div class="diff-desc">A capable AI that usually gets the right answer. A fair challenge.</div>
+        </div>
+        <div class="diff-ai-score">AI scores 3–4</div>
+      </div>
+
+      <div class="diff-card" data-diff="genius" tabindex="0" role="button" aria-pressed="false">
+        <div class="diff-icon">🔴</div>
+        <div class="diff-info">
+          <div class="diff-name">Genius AI</div>
+          <div class="diff-desc">A near-perfect AI. Can you outsmart something that almost never fails?</div>
+        </div>
+        <div class="diff-ai-score">AI scores 4–5</div>
+      </div>
+
+    </div>
+
+    <button class="diff-start-btn" id="diff-start-btn" disabled>Select a difficulty to continue</button>
+    <button class="btn outline" id="diff-back-btn" style="margin-top:10px;">← Back</button>
   </div>
 
   <!-- Quiz Screen -->
@@ -240,6 +330,7 @@
       </div>
       <span class="score-display" id="score-display">Score: 0</span>
     </div>
+    <div class="diff-indicator" id="diff-indicator"></div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
     <div class="question-card">
       <p class="question-text" id="question-text"></p>
@@ -252,6 +343,7 @@
   <div class="screen" id="result-screen">
     <div class="result-card">
       <div class="streak-milestone" id="streak-milestone"></div>
+      <div class="diff-result-badge" id="diff-result-badge"></div>
       <div class="perf-tier" id="perf-tier"></div>
       <div class="result-emoji" id="result-emoji"></div>
       <div class="result-title" id="result-title"></div>
@@ -303,63 +395,34 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Streak Logic ── */
-  const STREAK_KEY     = 'aysai_streak';
+  const STREAK_KEY      = 'aysai_streak';
   const LAST_PLAYED_KEY = 'aysai_last_played';
 
   function getTodayStr() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
-
-  function getDaysBetween(dateStrA, dateStrB) {
-    const a = new Date(dateStrA);
-    const b = new Date(dateStrB);
-    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  function getDaysBetween(a, b) {
+    return Math.round((new Date(b) - new Date(a)) / 86400000);
   }
+  function loadStreak()          { return parseInt(localStorage.getItem(STREAK_KEY) || '0', 10); }
+  function saveStreak(v)         { localStorage.setItem(STREAK_KEY, String(v)); }
+  function getLastPlayed()       { return localStorage.getItem(LAST_PLAYED_KEY) || null; }
+  function saveLastPlayed(d)     { localStorage.setItem(LAST_PLAYED_KEY, d); }
 
-  function loadStreak() {
-    return parseInt(localStorage.getItem(STREAK_KEY) || '0', 10);
-  }
-
-  function saveStreak(val) {
-    localStorage.setItem(STREAK_KEY, String(val));
-  }
-
-  function getLastPlayed() {
-    return localStorage.getItem(LAST_PLAYED_KEY) || null;
-  }
-
-  function saveLastPlayed(dateStr) {
-    localStorage.setItem(LAST_PLAYED_KEY, dateStr);
-  }
-
-  // Calculate and update streak when a game finishes. Returns {streak, isNew, wasReset}
   function updateStreak() {
     const today      = getTodayStr();
     const lastPlayed = getLastPlayed();
-    let streak       = loadStreak();
-    let isNew        = false;
-    let wasReset     = false;
-
+    let streak = loadStreak(), isNew = false, wasReset = false;
     if (!lastPlayed) {
-      // First time ever
-      streak  = 1;
-      isNew   = true;
+      streak = 1; isNew = true;
     } else if (lastPlayed === today) {
-      // Already played today — don't change streak
+      // already played today
     } else {
       const diff = getDaysBetween(lastPlayed, today);
-      if (diff === 1) {
-        // Consecutive day
-        streak++;
-        isNew = true;
-      } else {
-        // Missed one or more days
-        streak   = 1;
-        wasReset = true;
-      }
+      if (diff === 1) { streak++; isNew = true; }
+      else            { streak = 1; wasReset = true; }
     }
-
     saveStreak(streak);
     saveLastPlayed(today);
     renderStreakBar(streak, isNew);
@@ -367,32 +430,31 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function renderStreakBar(streak, highlight) {
-    const countEl = document.getElementById('streak-count');
-    countEl.textContent = streak;
-    countEl.className   = 'streak-count' + (highlight ? ' streak-new' : '');
-    // Remove animation class after it plays so it can re-trigger
-    if (highlight) {
-      countEl.addEventListener('animationend', function () {
-        countEl.classList.remove('streak-new');
-      }, { once: true });
-    }
+    const el = document.getElementById('streak-count');
+    el.textContent = streak;
+    el.className   = 'streak-count' + (highlight ? ' streak-new' : '');
+    if (highlight) el.addEventListener('animationend', () => el.classList.remove('streak-new'), { once: true });
   }
 
-  // Init streak display on load (read-only, no update)
-  (function initStreakDisplay() {
+  // Init display
+  (function () {
     const streak     = loadStreak();
     const lastPlayed = getLastPlayed();
     const today      = getTodayStr();
-    let displayStreak = streak;
-
-    if (lastPlayed && lastPlayed !== today) {
-      const diff = getDaysBetween(lastPlayed, today);
-      if (diff > 1) displayStreak = 0; // streak is broken, show 0 until they play
-    }
-    if (!lastPlayed) displayStreak = 0;
-
-    document.getElementById('streak-count').textContent = displayStreak;
+    let display      = streak;
+    if (!lastPlayed) display = 0;
+    else if (lastPlayed !== today && getDaysBetween(lastPlayed, today) > 1) display = 0;
+    document.getElementById('streak-count').textContent = display;
   })();
+
+  /* ── Difficulty Config ── */
+  const DIFFICULTIES = {
+    easy:   { label: 'Easy AI',   icon: '🟢', badgeCls: 'drb-easy',   indicatorColor: '#34d399', aiMin: 1, aiMax: 2 },
+    smart:  { label: 'Smart AI',  icon: '🔵', badgeCls: 'drb-smart',  indicatorColor: '#60a5fa', aiMin: 3, aiMax: 4 },
+    genius: { label: 'Genius AI', icon: '🔴', badgeCls: 'drb-genius', indicatorColor: '#f87171', aiMin: 4, aiMax: 5 }
+  };
+
+  let selectedDiff = null;
 
   /* ── Questions ── */
   const questions = [
@@ -404,123 +466,4 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     {
       q: "If it takes 5 machines 5 minutes to make 5 widgets, how long does it take 100 machines to make 100 widgets?",
-      choices: ["100 minutes", "50 minutes", "5 minutes", "1 minute"],
-      answer: 2,
-      explain: "Each machine makes 1 widget in 5 minutes. 100 machines make 100 widgets in 5 minutes."
-    },
-    {
-      q: "In a lake, there's a patch of lily pads. Every day the patch doubles in size. If it takes 48 days to cover the whole lake, how long to cover half the lake?",
-      choices: ["24 days", "36 days", "47 days", "12 days"],
-      answer: 2,
-      explain: "Since it doubles daily, half the lake was covered just one day before — day 47."
-    },
-    {
-      q: "What is the next number in this sequence? 1, 11, 21, 1211, 111221, ?",
-      choices: ["222231", "312211", "1112221", "1234321"],
-      answer: 1,
-      explain: "This is the Look-and-Say sequence. Each term describes the previous: one 3, one 1, two 2s, two 1s → 312211."
-    },
-    {
-      q: "You have a 3-litre jug and a 5-litre jug. How do you measure exactly 4 litres of water?",
-      choices: [
-        "Fill the 5L, pour into 3L, empty 3L, pour remaining into 3L, fill 5L again, top up 3L",
-        "Fill 3L, pour into 5L. Fill 3L again, pour into 5L (1L left). Empty 5L. Pour 1L in. Fill 3L, add to 5L → 4L",
-        "It's impossible with these two jugs",
-        "Fill the 5L halfway"
-      ],
-      answer: 1,
-      explain: "Fill 3L, pour into 5L. Fill 3L again, pour into 5L (1L remains). Empty 5L. Pour 1L in. Fill 3L and add → 4L!"
-    }
-  ];
-
-  const perfTiers = [
-    { max: 1, icon: '☕', label: 'Needs More Coffee',       cls: 'tier-1' },
-    { max: 2, icon: '🧩', label: 'Average Brain',           cls: 'tier-2' },
-    { max: 3, icon: '⚡', label: 'Sharp Mind',              cls: 'tier-3' },
-    { max: 4, icon: '🚀', label: 'Elite Thinker',           cls: 'tier-4' },
-    { max: 5, icon: '👑', label: 'Human Superintelligence', cls: 'tier-5' }
-  ];
-
-  let currentQ = 0, score = 0, timer = null, timeLeft = 30, answered = false;
-  let finalShareText = '';
-
-  const screens = {
-    start:  document.getElementById('start-screen'),
-    quiz:   document.getElementById('quiz-screen'),
-    result: document.getElementById('result-screen')
-  };
-
-  function showScreen(name) {
-    Object.values(screens).forEach(s => s.classList.remove('active'));
-    screens[name].classList.add('active');
-  }
-
-  document.getElementById('start-btn').addEventListener('click', startQuiz);
-  document.getElementById('restart-btn').addEventListener('click', startQuiz);
-  document.getElementById('home-btn').addEventListener('click', () => showScreen('start'));
-
-  /* Share button */
-  const shareBtn     = document.getElementById('share-btn');
-  const shareBtnText = document.getElementById('share-btn-text');
-
-  shareBtn.addEventListener('click', function () {
-    if (navigator.share) {
-      navigator.share({ title: 'Are You Smarter Than AI?', text: finalShareText }).catch(function () {});
-    } else {
-      navigator.clipboard.writeText(finalShareText).then(function () {
-        shareBtnText.textContent = 'Score Copied!';
-        shareBtn.classList.add('copied');
-        shareBtn.querySelector('.share-icon').textContent = '✅';
-        setTimeout(function () {
-          shareBtnText.textContent = 'Share Your Score';
-          shareBtn.classList.remove('copied');
-          shareBtn.querySelector('.share-icon').textContent = '📤';
-        }, 2500);
-      }).catch(function () {
-        alert('Score copied!\n\n' + finalShareText);
-      });
-    }
-  });
-
-  function startQuiz() {
-    currentQ = 0; score = 0;
-    showScreen('quiz');
-    loadQuestion();
-  }
-
-  function loadQuestion() {
-    answered = false;
-    clearInterval(timer);
-    timeLeft = 30;
-
-    const q = questions[currentQ];
-    document.getElementById('q-counter').textContent = `Question ${currentQ + 1} of ${questions.length}`;
-    document.getElementById('score-display').textContent = `Score: ${score}`;
-    document.getElementById('progress-fill').style.width = `${(currentQ / questions.length) * 100}%`;
-    document.getElementById('question-text').textContent = q.q;
-    document.getElementById('feedback').textContent = '';
-    document.getElementById('feedback').className = 'feedback';
-
-    const choicesEl = document.getElementById('choices');
-    choicesEl.innerHTML = '';
-    q.choices.forEach((c, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'choice-btn';
-      btn.textContent = c;
-      btn.addEventListener('click', () => selectAnswer(i));
-      choicesEl.appendChild(btn);
-    });
-
-    startTimer();
-  }
-
-  function startTimer() {
-    const timerEl = document.getElementById('timer');
-    timerEl.textContent = timeLeft;
-    timerEl.className = timeLeft <= 10 ? 'danger' : '';
-    timer = setInterval(() => {
-      timeLeft--;
-      timerEl.textContent = timeLeft;
-      timerEl.className = timeLeft <= 10 ? 'danger' : '';
-      if (timeLeft <= 0) { clearInterval(timer); if (!answered) timeUp(); }
-   
+      choices: ["100 minutes", "50 m
