@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Speed Hub</title>
+    <style>
+        :root {
+            --bg: #080808;
+            --card-bg: rgba(26, 26, 26, 0.4);
+            --text: #fff;
+            --text-dim: #71717a;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(120px);
+            opacity: 0.05;
+        }
+        .orb-1 { top: -10%; left: -10%; width: 40%; height: 40%; background: var(--accent-green); }
+        .orb-2 { top: 20%; right: -10%; width: 30%; height: 30%; background: var(--accent-blue); }
+        .orb-3 { bottom: -10%; left: 20%; width: 50%; height: 50%; background: var(--accent-purple); }
+
+        #app {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Menu Styles */
+        .menu-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 48px;
+        }
+
+        .menu-header {
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+
+        .badge span {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+        }
+
+        .menu-header h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            line-height: 1;
+        }
+
+        .menu-header h1 span {
+            background: linear-gradient(to right, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .menu-header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 24px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .game-card:active {
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .game-card .icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .game-card:hover .icon-box {
+            transform: scale(1.1);
+        }
+
+        .card-reaction .icon-box { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+        .card-math .icon-box { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+        .card-logic .icon-box { background: rgba(168, 85, 247, 0.1); color: var(--accent-purple); }
+
+        .game-card h3 { font-size: 1.25rem; font-weight: 800; color: #fff; }
+        .game-card p { font-size: 0.9rem; color: var(--text-dim); font-weight: 500; }
+
+        /* Game UI Components */
+        .game-top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .back-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-circle:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .game-title-box { text-align: center; }
+        .game-title-box h2 { font-size: 1.25rem; font-weight: 800; }
+        .game-title-box .round-info { color: var(--text-dim); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 2px; }
+
+        .game-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Reaction Game */
+        #reaction-area {
+            width: 100%;
+            max-width: 380px;
+            aspect-ratio: 1;
+            border-radius: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+            background: var(--card-bg);
+            border: 4px solid var(--border);
+        }
+
+        .reaction-waiting { background: var(--card-bg); color: #333; }
+        .reaction-active { background: var(--accent-green) !important; color: white; border-color: rgba(255,255,255,0.2) !important; box-shadow: 0 0 50px rgba(16, 185, 129, 0.4); }
+        .reaction-active p { font-size: 3rem; font-weight: 900; animation: bounce 0.5s infinite; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .btn-start-large {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: linear-gradient(to br, var(--accent-green), #059669);
+            border: none;
+            color: white;
+            font-size: 1.75rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
+            transition: transform 0.2s;
+        }
+        .btn-start-large:active { transform: scale(0.95); }
+
+        /* Math Game */
+        .math-question { font-size: 5rem; font-weight: 900; margin-bottom: 40px; letter-spacing: -0.05em; }
+        @media (max-width: 380px) { .math-question { font-size: 4rem; } }
+
+        .math-input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            color: white;
+            font-size: 2.5rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .math-input:focus { border-color: var(--accent-blue); }
+        
+        .btn-action {
+            width: 100%;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 24px;
+            padding: 20px;
+            font-weight: 900;
+            font-size: 1.25rem;
+            margin-top: 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-action:active { background: #e4e4e7; transform: scale(0.98); }
+
+        /* Logic Game */
+        .logic-question-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 32px;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+            text-align: center;
+            width: 100%;
+            margin-bottom: 32px;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logic-question-card p { font-size: 1.25rem; font-weight: 700; line-height: 1.5; }
+
+        .logic-options { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+        .logic-option {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 20px 24px;
+            border-radius: 20px;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logic-option:active { background: rgba(255,255,255,0.05); transform: scale(0.98); }
+        .logic-option span.arrow { opacity: 0.2; font-size: 0.8rem; }
+
+        /* Result Screen */
+        .result-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 48px 32px;
+            border-radius: 48px;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .trophy-box {
+            width: 72px;
+            height: 72px;
+            border-radius: 24px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .result-label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.75rem; font-weight: 800; }
+        .result-score { font-size: 5rem; font-weight: 900; line-height: 1; }
+        .result-score span { font-size: 1.5rem; color: var(--text-dim); margin-left: 4px; }
+        
+        .result-msg-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .result-msg-box p { font-weight: 600; color: #d4d4d8; }
+
+        .btn-retry {
+            width: 100%;
+            padding: 20px;
+            border-radius: 24px;
+            border: none;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: white;
+            transition: brightness 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div id="app">
+    <!-- Menu Screen -->
+    <div id="screen-menu" class="screen active">
+        <div class="menu-container">
+            <div class="menu-header">
+                <div class="badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-green)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Performance Hub</span>
+                </div>
+                <h1>BRAIN<span>SPEED</span></h1>
+                <p>Test your cognitive limits.</p>
+            </div>
+            <div class="game-list">
+                <div class="game-card card-reaction" onclick="showScreen('reaction')">
+                    <div class="icon-box">⚡</div>
+                    <div>
+                        <h3>Reaction Test</h3>
+                        <p>Test your reflexes</p>
+                    </div>
+                </div>
+                <div class="game-card card-math" onclick="showScreen('math')">
+                    <div class="icon-box">🧮</div>
+                    <div>
+                        <h3>Quick Math</h3>
+                        <p>Mental arithmetic speed</p>
+                    </div>
+                </div>
+                <div class="game-card card-logic" onclick="showScreen('logic')">
+                    <div class="icon-box">🧠</div>
+                    <div>
+                        <h3>Logic Quiz</h3>
+                        <p>Beat the AI logic</p>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; color: #333; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">v1.2.0 • Crafted for Speed</div>
+        </div>
+    </div>
+
+    <!-- Reaction Screen -->
+    <div id="screen-reaction" class="screen">
+        <div class="game-top-nav">
+            <button class="back-circle" onclick="showScreen('menu')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </button>
+            <div class="game-title-box">
+                <h2>Reaction Test</h2>
+                <div class="round-info" id="reaction-round">Round 1 / 5</div>
+            </div>
+            <div style="width: 44px;"></div>
+        </div>
+        <div class="game-content" id="reaction-content">
+            <button class="btn-start-large" onclick="startReactionGame()">START</button>
+        </div>
+    </div>
+
+    <!-- Math Screen -->
+    <div id="screen-math" class="screen">
+        <div class="game-top-nav">
+            <button class="back-circle" onclick="showScreen('menu')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </button>
+            <div class="game-title-box">
+                <h2>Quick Math</h2>
+                <div class="round-info" id="math-round">Question 1 / 5</div>
+            </div>
+            <div style="width: 44px;"></div>
+        </div>
+        <div class="game-content" id="math-content">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
+
+    <!-- Logic Screen -->
+    <div id="screen-logic" class="screen">
+        <div class="game-top-nav">
+            <button class="back-circle" onclick="showScreen('menu')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </button>
+            <div class="game-title-box">
+                <h2>Logic Quiz</h2>
+                <div class="round-info" id="logic-round">Question 1 / 5</div>
+            </div>
+            <div style="width: 44px;"></div>
+        </div>
+        <div class="game-content" id="logic-content">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const screens = ['menu', 'reaction', 'math', 'logic'];
+    let currentRound = 0;
+    let scores = [];
+    let startTime = 0;
+    let reactionTimeout = null;
+
+    function showScreen(screenId) {
+        screens.forEach(s => document.getElementById(`screen-${s}`).classList.remove('active'));
+        document.getElementById(`screen-${screenId}`).classList.add('active');
+        resetGames();
+    }
+
+    function resetGames() {
+        currentRound = 0;
+        scores = [];
+        clearTimeout(reactionTimeout);
+        
+        // Reset Reaction UI
+        document.getElementById('reaction-content').innerHTML = '<button class="btn-start-large" onclick="startReactionGame()">START</button>';
+        document.getElementById('reaction-round').innerText = 'Round 1 / 5';
+
+        // Reset Math UI
+        document.getElementById('math-content').innerHTML = `
+            <div style="text-align: center; width: 100%; max-width: 320px;">
+                <div style="background: rgba(59, 130, 246, 0.05); padding: 40px; border-radius: 40px; border: 1px solid rgba(59, 130, 246, 0.1); margin-bottom: 32px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 16px;">🧮</div>
+                    <p style="color: #a1a1aa; font-weight: 500;">Solve 5 mental math problems as fast as you can!</p>
+                </div>
+                <button class="btn-action" style="background: linear-gradient(to right, #60a5fa, #2563eb); color: white;" onclick="startMathGame()">START CHALLENGE</button>
+            </div>
+        `;
+        document.getElementById('math-round').innerText = 'Question 1 / 5';
+
+        // Reset Logic UI
+        document.getElementById('logic-content').innerHTML = `
+            <div style="text-align: center; width: 100%; max-width: 320px;">
+                <div style="background: rgba(168, 85, 247, 0.05); padding: 40px; border-radius: 40px; border: 1px solid rgba(168, 85, 247, 0.1); margin-bottom: 32px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 16px;">🧠</div>
+                    <p style="color: #a1a1aa; font-weight: 500; font-style: italic;">"Are You Smarter Than AI?"</p>
+                    <p style="color: #71717a; font-size: 0.8rem; margin-top: 8px;">Test your lateral thinking with 5 tricky questions.</p>
+                </div>
+                <button class="btn-action" style="background: linear-gradient(to right, #a78bfa, #7c3aed); color: white;" onclick="startLogicGame()">START QUIZ</button>
+            </div>
+        `;
+        document.getElementById('logic-round').innerText = 'Question 1 / 5';
+    }
+
+    // --- Reaction Game Logic ---
+    function startReactionGame() {
+        currentRound = 1;
+        scores = [];
+        nextReactionRound();
+    }
+
+    function nextReactionRound() {
+        document.getElementById('reaction-round').innerText = `Round ${currentRound} / 5`;
+        const content = document.getElementById('reaction-content');
+        content.innerHTML = `
+            <div id="reaction-area" class="reaction-waiting" onclick="handleReactionClick()">
+                <p id="reaction-text" style="font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; font-size: 1.25rem;">Wait for green...</p>
+            </div>
+        `;
+        
+        const delay = Math.floor(Math.random() * 2000) + 1000;
+        reactionTimeout = setTimeout(() => {
+            const area = document.getElementById('reaction-area');
+            if(area) {
+                area.classList.remove('reaction-waiting');
+                area.classList.add('reaction-active');
+                document.getElementById('reaction-text').innerText = 'TAP!';
+                startTime = Date.now();
+            }
+        }, delay);
+    }
+
+    function handleReactionClick() {
+        const area = document.getElementById('reaction-area');
+        if (area.classList.contains('reaction-active')) {
+            const reactionTime = Date.now() - startTime;
+            scores.push(reactionTime);
+            if (currentRound < 5) {
+                currentRound++;
+               
