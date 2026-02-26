@@ -17,149 +17,135 @@
     justify-content: center;
     padding: 16px;
   }
-  .container {
-    width: 100%;
-    max-width: 600px;
-  }
+  .container { width: 100%; max-width: 600px; }
   .screen { display: none; }
   .screen.active { display: block; }
 
-  h1 {
-    text-align: center;
-    font-size: 2rem;
-    color: #a78bfa;
-    margin-bottom: 8px;
-  }
-  .subtitle {
-    text-align: center;
-    color: #888;
-    margin-bottom: 32px;
-    font-size: 0.95rem;
-  }
+  h1 { text-align: center; font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 32px; font-size: 0.95rem; }
+
   .btn {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    background: #7c3aed;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 12px;
+    display: block; width: 100%; padding: 14px;
+    background: #7c3aed; color: #fff; border: none;
+    border-radius: 10px; font-size: 1.1rem; cursor: pointer;
+    transition: background 0.2s; margin-top: 12px;
   }
   .btn:hover { background: #6d28d9; }
   .btn.outline {
-    background: transparent;
-    border: 2px solid #7c3aed;
-    color: #a78bfa;
+    background: transparent; border: 2px solid #7c3aed; color: #a78bfa;
   }
   .btn.outline:hover { background: #1a1a2e; }
 
-  /* Quiz screen */
-  .hud {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+  .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   .q-counter { color: #888; font-size: 0.9rem; }
   .score-display { color: #a78bfa; font-weight: bold; }
-  .timer-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  #timer {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #34d399;
-    min-width: 36px;
-    text-align: right;
-    transition: color 0.3s;
-  }
+  .timer-wrap { display: flex; align-items: center; gap: 8px; }
+  #timer { font-size: 1.4rem; font-weight: bold; color: #34d399; min-width: 36px; text-align: right; transition: color 0.3s; }
   #timer.danger { color: #f87171; }
   .timer-label { color: #888; font-size: 0.85rem; }
 
-  .progress-bar {
-    height: 4px;
-    background: #1e1e30;
-    border-radius: 4px;
-    margin-bottom: 24px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: #7c3aed;
-    transition: width 0.4s ease;
-  }
+  .progress-bar { height: 4px; background: #1e1e30; border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #7c3aed; transition: width 0.4s ease; }
 
-  .question-card {
-    background: #1a1a2e;
-    border: 1px solid #2d2d4e;
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .question-text {
-    font-size: 1.15rem;
-    line-height: 1.6;
-    color: #e0e0e0;
-  }
+  .question-card { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+  .question-text { font-size: 1.15rem; line-height: 1.6; color: #e0e0e0; }
 
   .choices { display: flex; flex-direction: column; gap: 10px; }
   .choice-btn {
-    background: #1a1a2e;
-    border: 2px solid #2d2d4e;
-    color: #e0e0e0;
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 1rem;
-    cursor: pointer;
-    text-align: left;
-    transition: border-color 0.2s, background 0.2s;
+    background: #1a1a2e; border: 2px solid #2d2d4e; color: #e0e0e0;
+    border-radius: 10px; padding: 14px 18px; font-size: 1rem;
+    cursor: pointer; text-align: left; transition: border-color 0.2s, background 0.2s;
   }
-  .choice-btn:hover:not(:disabled) {
-    border-color: #7c3aed;
-    background: #22223a;
-  }
-  .choice-btn.correct {
-    border-color: #34d399;
-    background: #064e3b22;
-    color: #34d399;
-  }
-  .choice-btn.wrong {
-    border-color: #f87171;
-    background: #7f1d1d22;
-    color: #f87171;
-  }
+  .choice-btn:hover:not(:disabled) { border-color: #7c3aed; background: #22223a; }
+  .choice-btn.correct { border-color: #34d399; background: #064e3b22; color: #34d399; }
+  .choice-btn.wrong { border-color: #f87171; background: #7f1d1d22; color: #f87171; }
   .choice-btn:disabled { cursor: default; }
 
-  .feedback {
-    text-align: center;
-    font-size: 1rem;
-    min-height: 28px;
-    margin-top: 12px;
-    font-weight: 600;
-  }
+  .feedback { text-align: center; font-size: 1rem; min-height: 28px; margin-top: 12px; font-weight: 600; }
   .feedback.correct { color: #34d399; }
   .feedback.wrong { color: #f87171; }
 
-  /* Result screen */
+  /* Result Screen */
   .result-card {
-    background: #1a1a2e;
-    border: 1px solid #2d2d4e;
-    border-radius: 14px;
-    padding: 32px 24px;
-    text-align: center;
-    margin-bottom: 24px;
+    background: #1a1a2e; border: 1px solid #2d2d4e;
+    border-radius: 14px; padding: 32px 24px;
+    text-align: center; margin-bottom: 16px;
   }
   .result-emoji { font-size: 3.5rem; margin-bottom: 12px; }
-  .result-title { font-size: 1.6rem; color: #a78bfa; margin-bottom: 8px; }
-  .result-score { font-size: 3rem; font-weight: bold; color: #fff; margin: 16px 0 8px; }
-  .result-sub { color: #888; font-size: 0.95rem; }
-  .result-verdict { margin-top: 16px; font-size: 1rem; color: #e0e0e0; line-height: 1.5; }
+  .result-title { font-size: 1.6rem; color: #a78bfa; margin-bottom: 20px; }
+
+  .verdict-banner {
+    display: inline-block;
+    padding: 10px 28px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+    letter-spacing: 0.03em;
+  }
+  .verdict-win  { background: #064e3b44; color: #34d399; border: 2px solid #34d399; }
+  .verdict-tie  { background: #1e3a5f44; color: #60a5fa; border: 2px solid #60a5fa; }
+  .verdict-lose { background: #7f1d1d44; color: #f87171; border: 2px solid #f87171; }
+
+  .score-comparison {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #2d2d4e;
+  }
+  .score-side {
+    flex: 1;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+  .score-side.ai-side { background: #12122a; border-right: 1px solid #2d2d4e; }
+  .score-side.user-side { background: #12122a; }
+  .score-side .avatar { font-size: 2rem; }
+  .score-side .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
+  .score-side .big-score {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .score-side .fraction { font-size: 0.85rem; color: #666; }
+  .ai-side .big-score { color: #f87171; }
+  .user-side .big-score { color: #34d399; }
+
+  .vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f0f1a;
+    padding: 0 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 0.05em;
+    min-width: 32px;
+    border-left: 1px solid #2d2d4e;
+    border-right: 1px solid #2d2d4e;
+  }
+
+  .bar-wrap { width: 100%; padding: 0 24px; margin-bottom: 8px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-row-label { font-size: 0.78rem; color: #888; width: 32px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 10px; background: #1e1e30; border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width 1s ease; width: 0; }
+  .bar-fill.ai-bar { background: #f87171; }
+  .bar-fill.user-bar { background: #34d399; }
+  .bar-score-label { font-size: 0.78rem; font-weight: 700; width: 28px; flex-shrink: 0; }
+  .bar-score-label.ai-label { color: #f87171; }
+  .bar-score-label.user-label { color: #34d399; }
+
+  .result-verdict { color: #aaa; font-size: 0.9rem; line-height: 1.6; padding: 0 8px; }
 
   .start-icon { font-size: 3rem; text-align: center; margin-bottom: 16px; }
   .features { list-style: none; color: #888; font-size: 0.9rem; margin-bottom: 28px; text-align: center; line-height: 2; }
@@ -172,7 +158,7 @@
   <div class="screen active" id="start-screen">
     <div class="start-icon">🧠</div>
     <h1>Are You Smarter Than AI?</h1>
-    <p class="subtitle">5 tricky logic & maths questions. Think fast!</p>
+    <p class="subtitle">5 tricky logic &amp; maths questions. Think fast!</p>
     <ul class="features">
       <li>⏱ 30 seconds per question</li>
       <li>🔢 5 brain-bending questions</li>
@@ -204,9 +190,39 @@
     <div class="result-card">
       <div class="result-emoji" id="result-emoji"></div>
       <div class="result-title" id="result-title"></div>
-      <div class="result-score" id="result-score"></div>
-      <div class="result-sub">out of 5 questions</div>
-      <div class="result-verdict" id="result-verdict"></div>
+
+      <div class="verdict-banner" id="verdict-banner"></div>
+
+      <div class="score-comparison">
+        <div class="score-side ai-side">
+          <span class="avatar">🤖</span>
+          <span class="label">AI</span>
+          <span class="big-score" id="ai-big-score">0</span>
+          <span class="fraction">out of 5</span>
+        </div>
+        <div class="vs-divider">VS</div>
+        <div class="score-side user-side">
+          <span class="avatar">🧠</span>
+          <span class="label">You</span>
+          <span class="big-score" id="user-big-score">0</span>
+          <span class="fraction">out of 5</span>
+        </div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar-row">
+          <span class="bar-row-label">🤖</span>
+          <div class="bar-track"><div class="bar-fill ai-bar" id="ai-bar"></div></div>
+          <span class="bar-score-label ai-label" id="ai-bar-label"></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-row-label">🧠</span>
+          <div class="bar-track"><div class="bar-fill user-bar" id="user-bar"></div></div>
+          <span class="bar-score-label user-label" id="user-bar-label"></span>
+        </div>
+      </div>
+
+      <p class="result-verdict" id="result-verdict"></p>
     </div>
     <button class="btn" id="restart-btn">Play Again</button>
     <button class="btn outline" id="home-btn">Back to Home</button>
@@ -246,24 +262,20 @@ document.addEventListener('DOMContentLoaded', function () {
       q: "You have a 3-litre jug and a 5-litre jug. How do you measure exactly 4 litres of water?",
       choices: [
         "Fill the 5L, pour into 3L, empty 3L, pour remaining into 3L, fill 5L again, top up 3L",
-        "Fill the 3L twice and pour into 5L, leaving 1L in 3L; empty 5L, pour 1L in, fill 3L again and add",
+        "Fill 3L, pour into 5L. Fill 3L again, pour into 5L (1L left). Empty 5L. Pour 1L in. Fill 3L, add to 5L → 4L",
         "It's impossible with these two jugs",
         "Fill the 5L halfway"
       ],
       answer: 1,
-      explain: "Fill 3L, pour into 5L. Fill 3L again, pour into 5L (now has 5L, 1L left in 3L). Empty 5L. Pour 1L in. Fill 3L and add to 5L → 4L!"
+      explain: "Fill 3L, pour into 5L. Fill 3L again, pour into 5L (1L remains). Empty 5L. Pour 1L in. Fill 3L and add → 4L!"
     }
   ];
 
-  let currentQ = 0;
-  let score = 0;
-  let timer = null;
-  let timeLeft = 30;
-  let answered = false;
+  let currentQ = 0, score = 0, timer = null, timeLeft = 30, answered = false;
 
   const screens = {
     start: document.getElementById('start-screen'),
-    quiz: document.getElementById('quiz-screen'),
+    quiz:  document.getElementById('quiz-screen'),
     result: document.getElementById('result-screen')
   };
 
@@ -277,8 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('home-btn').addEventListener('click', () => showScreen('start'));
 
   function startQuiz() {
-    currentQ = 0;
-    score = 0;
+    currentQ = 0; score = 0;
     showScreen('quiz');
     loadQuestion();
   }
@@ -313,15 +324,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const timerEl = document.getElementById('timer');
     timerEl.textContent = timeLeft;
     timerEl.className = timeLeft <= 10 ? 'danger' : '';
-
     timer = setInterval(() => {
       timeLeft--;
       timerEl.textContent = timeLeft;
       timerEl.className = timeLeft <= 10 ? 'danger' : '';
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        if (!answered) timeUp();
-      }
+      if (timeLeft <= 0) { clearInterval(timer); if (!answered) timeUp(); }
     }, 1000);
   }
 
@@ -329,8 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
     answered = true;
     disableChoices();
     const q = questions[currentQ];
-    const btns = document.querySelectorAll('.choice-btn');
-    btns[q.answer].classList.add('correct');
+    document.querySelectorAll('.choice-btn')[q.answer].classList.add('correct');
     const fb = document.getElementById('feedback');
     fb.textContent = "⏱ Time's up! " + q.explain;
     fb.className = 'feedback wrong';
@@ -341,24 +347,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (answered) return;
     answered = true;
     clearInterval(timer);
-
     const q = questions[currentQ];
-    const btns = document.querySelectorAll('.choice-btn');
     disableChoices();
-
     const fb = document.getElementById('feedback');
     if (index === q.answer) {
       score++;
-      btns[index].classList.add('correct');
+      document.querySelectorAll('.choice-btn')[index].classList.add('correct');
       fb.textContent = '✅ Correct! ' + q.explain;
       fb.className = 'feedback correct';
     } else {
-      btns[index].classList.add('wrong');
-      btns[q.answer].classList.add('correct');
+      document.querySelectorAll('.choice-btn')[index].classList.add('wrong');
+      document.querySelectorAll('.choice-btn')[q.answer].classList.add('correct');
       fb.textContent = '❌ Wrong! ' + q.explain;
       fb.className = 'feedback wrong';
     }
-
     document.getElementById('score-display').textContent = `Score: ${score}`;
     setTimeout(nextQuestion, 2800);
   }
@@ -369,29 +371,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function nextQuestion() {
     currentQ++;
-    if (currentQ < questions.length) {
-      loadQuestion();
-    } else {
-      showResult();
-    }
+    if (currentQ < questions.length) loadQuestion();
+    else showResult();
   }
 
   function showResult() {
     showScreen('result');
-    document.getElementById('result-score').textContent = `${score}/5`;
 
-    const data = [
-      { max: 1, emoji: '🤖', title: 'The AI Wins!', verdict: 'Don\'t worry — these questions trick almost everyone. The AI got them all right, of course.' },
-      { max: 2, emoji: '😅', title: 'Close, But No Cigar', verdict: 'The AI edged you out this time. A little more lateral thinking and you\'ll be there!' },
-      { max: 3, emoji: '🤝', title: 'It\'s a Draw!', verdict: 'Not bad at all! You\'re right on par with AI-level reasoning. Keep sharpening that mind.' },
-      { max: 4, emoji: '🧠', title: 'Impressive!', verdict: 'You beat most people (and gave the AI a run for its money). Sharp thinker!' },
-      { max: 5, emoji: '🏆', title: 'You\'re Smarter Than AI!', verdict: 'Perfect score! You aced every trick question. Extraordinary logical reasoning!' }
-    ];
+    const aiScore = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5
+    const userScore = score;
 
-    const result = data.find(d => score <= d.max) || data[data.length - 1];
-    document.getElementById('result-emoji').textContent = result.emoji;
-    document.getElementById('result-title').textContent = result.title;
-    document.getElementById('result-verdict').textContent = result.verdict;
+    document.getElementById('ai-big-score').textContent   = aiScore;
+    document.getElementById('user-big-score').textContent = userScore;
+    document.getElementById('ai-bar-label').textContent   = aiScore + '/5';
+    document.getElementById('user-bar-label').textContent = userScore + '/5';
+
+    // Animate bars after short delay
+    setTimeout(() => {
+      document.getElementById('ai-bar').style.width   = (aiScore / 5 * 100) + '%';
+      document.getElementById('user-bar').style.width = (userScore / 5 * 100) + '%';
+    }, 150);
+
+    let emoji, title, verdictClass, verdictText, blurb;
+
+    if (userScore > aiScore) {
+      emoji       = '🏆';
+      title       = 'You Beat the AI!';
+      verdictClass = 'verdict-win';
+      verdictText  = '🎉 You beat AI!';
+      blurb        = `You scored ${userScore}/5 while the AI only managed ${aiScore}/5. Exceptional reasoning — you outperformed the machine!`;
+    } else if (userScore === aiScore) {
+      emoji       = '🤝';
+      title       = 'You Matched the AI!';
+      verdictClass = 'verdict-tie';
+      verdictText  = '🤝 You matched AI.';
+      blurb        = `Both you and the AI scored ${userScore}/5. A perfect tie — you think just like a machine. Try again to break the deadlock!`;
+    } else {
+      emoji       = '🤖';
+      title       = 'AI Wins This Round';
+      verdictClass = 'verdict-lose';
+      verdictText  = '🤖 AI wins this round.';
+      blurb        = `The AI scored ${aiScore}/5 versus your ${userScore}/5. These questions are designed to fool humans — don't give up, try again!`;
+    }
+
+    document.getElementById('result-emoji').textContent  = emoji;
+    document.getElementById('result-title').textContent  = title;
+    document.getElementById('result-verdict').textContent = blurb;
+
+    const banner = document.getElementById('verdict-banner');
+    banner.textContent  = verdictText;
+    banner.className    = 'verdict-banner ' + verdictClass;
   }
 
 });
