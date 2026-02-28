@@ -1,59 +1,3 @@
-**HTML snippet — replace your result-card div:**
-
-<div class="result-card" id="result-card">
-<h2 class="result-heading">Can YOU Beat AI?</h2>
-<div class="streak-milestone" id="streak-milestone"></div>
-<div class="diff-result-badge" id="diff-result-badge"></div>
-<div class="perf-tier" id="perf-tier"></div>
-<div class="result-emoji" id="result-emoji"></div>
-<div class="result-title" id="result-title"></div>
-<div class="verdict-banner" id="verdict-banner"></div>
-<div class="score-lines">
-<div class="score-line"><span>🧠 You scored</span><b class="sc-you" id="rsl-user">—</b></div>
-<div class="score-line"><span>🤖 AI scored</span><b class="sc-ai" id="rsl-ai">—</b></div>
-</div>
-<div class="score-comparison">
-<div class="score-side ai-side">
-<span class="avatar">🤖</span>
-<span class="label">AI</span>
-<span class="big-score" id="ai-big-score">0</span>
-<span class="fraction">out of 5</span>
-</div>
-<div class="vs-divider">VS</div>
-<div class="score-side user-side">
-<span class="avatar">🧠</span>
-<span class="label">You</span>
-<span class="big-score" id="user-big-score">0</span>
-<span class="fraction">out of 5</span>
-</div>
-</div>
-<div class="bar-wrap">
-<div class="bar-row">
-<span class="bar-row-label">🤖</span>
-<div class="bar-track"><div class="bar-fill ai-bar" id="ai-bar"></div></div>
-<span class="bar-score-label ai-label" id="ai-bar-label"></span>
-</div>
-<div class="bar-row">
-<span class="bar-row-label">🧠</span>
-<div class="bar-track"><div class="bar-fill user-bar" id="user-bar"></div></div>
-<span class="bar-score-label user-label" id="user-bar-label"></span>
-</div>
-</div>
-<p class="result-verdict" id="result-verdict"></p>
-</div>
-
-**CSS — add inside your style block:**
-
-.result-card{background:#0b0b1e;border:2px solid #22d3ee;box-shadow:0 0 20px #22d3ee44,0 0 6px #22d3ee22;border-radius:14px;padding:28px 22px 24px;text-align:center;margin-bottom:16px;animation:rPop .35s cubic-bezier(.175,.885,.32,1.275) both}
-@keyframes rPop{from{transform:scale(.93);opacity:0}to{transform:scale(1);opacity:1}}
-.result-heading{font-size:1.55rem;font-weight:900;color:#22d3ee;margin-bottom:16px;letter-spacing:-.01em}
-.score-lines{background:#111128;border:1px solid #2d2d4e;border-radius:10px;padding:11px 16px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px}
-.score-line{display:flex;justify-content:space-between;align-items:center;font-size:.93rem;color:#aaa}
-.sc-you{font-size:1.05rem;font-weight:800;color:#34d399}
-.sc-ai{font-size:1.05rem;font-weight:800;color:#f87171}
-
-**JS snippet — replace your showResult function:**
-
 function showResult(){
   var lbl=document.getElementById("share-label");
   var icon=document.getElementById("btn-share").querySelector(".share-icon");
@@ -61,14 +5,17 @@ function showResult(){
   document.getElementById("btn-share").classList.remove("copied");
   icon.textContent="📤";
   showScreen("screen-result");
+
   var sr=commitStreak();
   var d=DIFF[selectedDiff];
   var aiScore=d.aiMin+Math.floor(Math.random()*(d.aiMax-d.aiMin+1));
   var userScore=score;
   var tier=perfTiers[0];
   for(var i=0;i<perfTiers.length;i++){if(userScore<=perfTiers[i].max){tier=perfTiers[i];break;}}
+
   document.getElementById("rsl-user").textContent=userScore+"/5";
-  document.getElementById("rsl-ai").textContent=aiScore+"/5";
+  document.getElementById("rsl-ai").textContent="...";
+
   var msEl=document.getElementById("streak-milestone");
   msEl.className="streak-milestone";
   msEl.textContent="";
@@ -76,31 +23,56 @@ function showResult(){
   else if(sr.isNew&&sr.streak>=7){msEl.className="streak-milestone show";msEl.textContent="🏅 "+sr.streak+"-day streak — you're on fire! 🔥";}
   else if(sr.isNew&&sr.streak>=3){msEl.className="streak-milestone show";msEl.textContent="🔥 "+sr.streak+"-day streak! Keep it going!";}
   else if(sr.isNew&&sr.streak===1){msEl.className="streak-milestone show";msEl.textContent="🔥 Streak started! Come back tomorrow to build it up!";}
+
   var drbEl=document.getElementById("diff-result-badge");
   drbEl.className="diff-result-badge "+d.badgeCls;
   drbEl.textContent=d.icon+" vs "+d.label;
+
   var perfEl=document.getElementById("perf-tier");
   perfEl.className="perf-tier "+tier.cls;
   perfEl.innerHTML="<span>"+tier.icon+"</span><span>"+tier.label+"</span>";
-  document.getElementById("ai-big-score").textContent=aiScore;
+
+  document.getElementById("result-emoji").textContent="🤖";
+  document.getElementById("result-title").textContent="AI is analyzing your performance...";
+  document.getElementById("result-verdict").textContent="";
+
+  document.getElementById("ai-big-score").textContent="?";
   document.getElementById("user-big-score").textContent=userScore;
-  document.getElementById("ai-bar-label").textContent=aiScore+"/5";
+  document.getElementById("ai-bar-label").textContent="";
   document.getElementById("user-bar-label").textContent=userScore+"/5";
   document.getElementById("ai-bar").style.width="0";
   document.getElementById("user-bar").style.width="0";
+
+  var banner=document.getElementById("verdict-banner");
+  banner.textContent="";
+  banner.className="verdict-banner";
+  banner.style.display="none";
+
+  document.getElementById("score-comparison").style.opacity="0";
+  document.getElementById("score-comparison").style.transition="opacity 0.5s ease";
+
   setTimeout(function(){
+    var emoji,title,vCls,vTxt,blurb;
+    if(userScore>aiScore){emoji="🏆";title="You Beat the AI!";vCls="verdict-win";vTxt="🎉 You beat AI!";blurb="You scored "+userScore+"/5 while the "+d.label+" only managed "+aiScore+"/5. Outstanding!";}
+    else if(userScore===aiScore){emoji="🤝";title="You Matched the AI!";vCls="verdict-tie";vTxt="🤝 You matched AI.";blurb="Both you and the "+d.label+" scored "+userScore+"/5. A perfect tie — try a harder difficulty!";}
+    else{emoji="🤖";title="AI Wins This Round";vCls="verdict-lose";vTxt="🤖 AI wins this round.";blurb="The "+d.label+" scored "+aiScore+"/5 vs your "+userScore+"/5. Don't give up — try again!";}
+
+    document.getElementById("rsl-ai").textContent=aiScore+"/5";
+    document.getElementById("result-emoji").textContent=emoji;
+    document.getElementById("result-title").textContent=title;
+    document.getElementById("result-verdict").textContent=blurb;
+
+    document.getElementById("ai-big-score").textContent=aiScore;
+    document.getElementById("ai-bar-label").textContent=aiScore+"/5";
+
+    document.getElementById("score-comparison").style.opacity="1";
+    banner.style.display="inline-block";
+    banner.textContent=vTxt;
+    banner.className="verdict-banner "+vCls;
+
     document.getElementById("ai-bar").style.width=(aiScore/5*100)+"%";
     document.getElementById("user-bar").style.width=(userScore/5*100)+"%";
-  },200);
-  var emoji,title,vCls,vTxt,blurb;
-  if(userScore>aiScore){emoji="🏆";title="You Beat the AI!";vCls="verdict-win";vTxt="🎉 You beat AI!";blurb="You scored "+userScore+"/5 while the "+d.label+" only managed "+aiScore+"/5. Outstanding!";}
-  else if(userScore===aiScore){emoji="🤝";title="You Matched the AI!";vCls="verdict-tie";vTxt="🤝 You matched AI.";blurb="Both you and the "+d.label+" scored "+userScore+"/5. A perfect tie — try a harder difficulty!";}
-  else{emoji="🤖";title="AI Wins This Round";vCls="verdict-lose";vTxt="🤖 AI wins this round.";blurb="The "+d.label+" scored "+aiScore+"/5 vs your "+userScore+"/5. Don't give up — try again!";}
-  document.getElementById("result-emoji").textContent=emoji;
-  document.getElementById("result-title").textContent=title;
-  document.getElementById("result-verdict").textContent=blurb;
-  var banner=document.getElementById("verdict-banner");
-  banner.textContent=vTxt;
-  banner.className="verdict-banner "+vCls;
-  shareText="I scored "+userScore+"/5 and got "+tier.icon+" "+tier.label+" in Are You Smarter Than AI! Can you beat me?";
+
+    shareText="I scored "+userScore+"/5 and got "+tier.icon+" "+tier.label+" in Are You Smarter Than AI! Can you beat me?";
+  },1500);
 }
