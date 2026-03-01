@@ -1,117 +1,77 @@
+**Add inside DOMContentLoaded, before any other code:**
 
-javascript
-var sounds={
-  correct:new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+
-  "nvT18A"),
-  wrong:new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+
-  "nvT18A"),
-  suspense:new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+
-  "nvT18A")
-};
-
-function makeBeep(freq,duration,type,vol){
-  try{
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    var osc=ctx.createOscillator();
-    var gain=ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type=type||"sine";
-    osc.frequency.setValueAtTime(freq,ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(freq*0.8,ctx.currentTime+duration);
-    gain.gain.setValueAtTime(vol||0.3,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime+duration);
-  }catch(e){}
-}
-
+```javascript
 function playCorrect(){
   try{
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    var gain=ctx.createGain();
-    gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(0.25,ctx.currentTime);
+    var c=new(window.AudioContext||window.webkitAudioContext)();
+    var g=c.createGain();
+    g.connect(c.destination);
     [523,659,784].forEach(function(f,i){
-      var o=ctx.createOscillator();
-      o.connect(gain);
+      var o=c.createOscillator();
+      o.connect(g);
       o.type="sine";
-      o.frequency.setValueAtTime(f,ctx.currentTime+i*0.1);
-      gain.gain.setValueAtTime(0.25,ctx.currentTime+i*0.1);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.15);
-      o.start(ctx.currentTime+i*0.1);
-      o.stop(ctx.currentTime+i*0.1+0.15);
+      o.frequency.value=f;
+      g.gain.setValueAtTime(0.2,c.currentTime+i*0.1);
+      g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.1+0.12);
+      o.start(c.currentTime+i*0.1);
+      o.stop(c.currentTime+i*0.1+0.12);
     });
   }catch(e){}
 }
 
 function playWrong(){
   try{
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    var gain=ctx.createGain();
-    gain.connect(ctx.destination);
+    var c=new(window.AudioContext||window.webkitAudioContext)();
+    var g=c.createGain();
+    g.connect(c.destination);
     [220,180].forEach(function(f,i){
-      var o=ctx.createOscillator();
-      o.connect(gain);
+      var o=c.createOscillator();
+      o.connect(g);
       o.type="sawtooth";
-      o.frequency.setValueAtTime(f,ctx.currentTime+i*0.15);
-      gain.gain.setValueAtTime(0.2,ctx.currentTime+i*0.15);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.15+0.18);
-      o.start(ctx.currentTime+i*0.15);
-      o.stop(ctx.currentTime+i*0.15+0.18);
+      o.frequency.value=f;
+      g.gain.setValueAtTime(0.18,c.currentTime+i*0.14);
+      g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.14+0.16);
+      o.start(c.currentTime+i*0.14);
+      o.stop(c.currentTime+i*0.14+0.16);
     });
   }catch(e){}
 }
 
 function playSuspense(){
   try{
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    var gain=ctx.createGain();
-    gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(0.12,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.4);
-    var o=ctx.createOscillator();
-    o.connect(gain);
+    var c=new(window.AudioContext||window.webkitAudioContext)();
+    var g=c.createGain();
+    g.connect(c.destination);
+    g.gain.setValueAtTime(0.1,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+1.4);
+    var o=c.createOscillator();
+    o.connect(g);
     o.type="sine";
-    o.frequency.setValueAtTime(160,ctx.currentTime);
-    o.frequency.linearRampToValueAtTime(260,ctx.currentTime+1.4);
-    o.start(ctx.currentTime);
-    o.stop(ctx.currentTime+1.4);
+    o.frequency.setValueAtTime(150,c.currentTime);
+    o.frequency.linearRampToValueAtTime(280,c.currentTime+1.4);
+    o.start(c.currentTime);
+    o.stop(c.currentTime+1.4);
   }catch(e){}
 }
 ```
 
-**Modify your `selectAnswer` function — add sound calls:**
+**In `selectAnswer`, add one line after each branch:**
 
 ```javascript
-function selectAnswer(idx){
-  if(answered)return;
-  answered=true;
-  clearInterval(countdown);
-  var q=questions[currentQ];
-  var btns=document.querySelectorAll(".choice-btn");
-  lockChoices();
-  var fb=document.getElementById("feedback");
-  if(idx===q.answer){
-    playCorrect();
-    score+=1;
-    btns[idx].classList.add("correct");
-    fb.textContent="✅ Correct! "+q.explain;
-    fb.className="feedback correct";
-  }else{
-    playWrong();
-    btns[idx].classList.add("wrong");
-    if(btns[q.answer]){btns[q.answer].classList.add("correct");}
-    fb.textContent="❌ Wrong! "+q.explain;
-    fb.className="feedback wrong";
-  }
-  document.getElementById("score-display").textContent="Score: "+score;
-  setTimeout(advance,2800);
-}
+if(idx===q.answer){
+  playCorrect();
+  score+=1;
 ```
 
-**Modify only the suspense line inside `showResult` — add `playSuspense()` call:**
+```javascript
+}else{
+  playWrong();
+  btns[idx].classList.add("wrong");
+```
+
+**In `showResult`, add one line after the analyzing text is set:**
 
 ```javascript
 document.getElementById("result-title").textContent="AI is analyzing your performance...";
 playSuspense();
+```
