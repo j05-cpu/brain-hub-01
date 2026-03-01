@@ -1,78 +1,118 @@
-function showResult(){
-  var lbl=document.getElementById("share-label");
-  var icon=document.getElementById("btn-share").querySelector(".share-icon");
-  lbl.textContent="Share Your Score";
-  document.getElementById("btn-share").classList.remove("copied");
-  icon.textContent="📤";
-  showScreen("screen-result");
+**Add this JS snippet immediately inside your DOMContentLoaded function, before any other code:**
 
-  var sr=commitStreak();
-  var d=DIFF[selectedDiff];
-  var aiScore=d.aiMin+Math.floor(Math.random()*(d.aiMax-d.aiMin+1));
-  var userScore=score;
-  var tier=perfTiers[0];
-  for(var i=0;i<perfTiers.length;i++){if(userScore<=perfTiers[i].max){tier=perfTiers[i];break;}}
+```javascript
+var sounds={
+  correct:new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+
+  "nvT18A"),
+  wrong:new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+
+  "nvT18A"),
+  suspense:new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+
+  "nvT18A")
+};
 
-  document.getElementById("rsl-user").textContent=userScore+"/5";
-  document.getElementById("rsl-ai").textContent="...";
-
-  var msEl=document.getElementById("streak-milestone");
-  msEl.className="streak-milestone";
-  msEl.textContent="";
-  if(sr.wasReset){msEl.className="streak-milestone show";msEl.textContent="💔 Streak reset — but you're back! New streak started 🔥";}
-  else if(sr.isNew&&sr.streak>=7){msEl.className="streak-milestone show";msEl.textContent="🏅 "+sr.streak+"-day streak — you're on fire! 🔥";}
-  else if(sr.isNew&&sr.streak>=3){msEl.className="streak-milestone show";msEl.textContent="🔥 "+sr.streak+"-day streak! Keep it going!";}
-  else if(sr.isNew&&sr.streak===1){msEl.className="streak-milestone show";msEl.textContent="🔥 Streak started! Come back tomorrow to build it up!";}
-
-  var drbEl=document.getElementById("diff-result-badge");
-  drbEl.className="diff-result-badge "+d.badgeCls;
-  drbEl.textContent=d.icon+" vs "+d.label;
-
-  var perfEl=document.getElementById("perf-tier");
-  perfEl.className="perf-tier "+tier.cls;
-  perfEl.innerHTML="<span>"+tier.icon+"</span><span>"+tier.label+"</span>";
-
-  document.getElementById("result-emoji").textContent="🤖";
-  document.getElementById("result-title").textContent="AI is analyzing your performance...";
-  document.getElementById("result-verdict").textContent="";
-
-  document.getElementById("ai-big-score").textContent="?";
-  document.getElementById("user-big-score").textContent=userScore;
-  document.getElementById("ai-bar-label").textContent="";
-  document.getElementById("user-bar-label").textContent=userScore+"/5";
-  document.getElementById("ai-bar").style.width="0";
-  document.getElementById("user-bar").style.width="0";
-
-  var banner=document.getElementById("verdict-banner");
-  banner.textContent="";
-  banner.className="verdict-banner";
-  banner.style.display="none";
-
-  document.getElementById("score-comparison").style.opacity="0";
-  document.getElementById("score-comparison").style.transition="opacity 0.5s ease";
-
-  setTimeout(function(){
-    var emoji,title,vCls,vTxt,blurb;
-    if(userScore>aiScore){emoji="🏆";title="You Beat the AI!";vCls="verdict-win";vTxt="🎉 You beat AI!";blurb="You scored "+userScore+"/5 while the "+d.label+" only managed "+aiScore+"/5. Outstanding!";}
-    else if(userScore===aiScore){emoji="🤝";title="You Matched the AI!";vCls="verdict-tie";vTxt="🤝 You matched AI.";blurb="Both you and the "+d.label+" scored "+userScore+"/5. A perfect tie — try a harder difficulty!";}
-    else{emoji="🤖";title="AI Wins This Round";vCls="verdict-lose";vTxt="🤖 AI wins this round.";blurb="The "+d.label+" scored "+aiScore+"/5 vs your "+userScore+"/5. Don't give up — try again!";}
-
-    document.getElementById("rsl-ai").textContent=aiScore+"/5";
-    document.getElementById("result-emoji").textContent=emoji;
-    document.getElementById("result-title").textContent=title;
-    document.getElementById("result-verdict").textContent=blurb;
-
-    document.getElementById("ai-big-score").textContent=aiScore;
-    document.getElementById("ai-bar-label").textContent=aiScore+"/5";
-
-    document.getElementById("score-comparison").style.opacity="1";
-    banner.style.display="inline-block";
-    banner.textContent=vTxt;
-    banner.className="verdict-banner "+vCls;
-
-    document.getElementById("ai-bar").style.width=(aiScore/5*100)+"%";
-    document.getElementById("user-bar").style.width=(userScore/5*100)+"%";
-
-    shareText="I scored "+userScore+"/5 and got "+tier.icon+" "+tier.label+" in Are You Smarter Than AI! Can you beat me?";
-  },1500);
+function makeBeep(freq,duration,type,vol){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type=type||"sine";
+    osc.frequency.setValueAtTime(freq,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq*0.8,ctx.currentTime+duration);
+    gain.gain.setValueAtTime(vol||0.3,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+duration);
+  }catch(e){}
 }
+
+function playCorrect(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var gain=ctx.createGain();
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.25,ctx.currentTime);
+    [523,659,784].forEach(function(f,i){
+      var o=ctx.createOscillator();
+      o.connect(gain);
+      o.type="sine";
+      o.frequency.setValueAtTime(f,ctx.currentTime+i*0.1);
+      gain.gain.setValueAtTime(0.25,ctx.currentTime+i*0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.15);
+      o.start(ctx.currentTime+i*0.1);
+      o.stop(ctx.currentTime+i*0.1+0.15);
+    });
+  }catch(e){}
+}
+
+function playWrong(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var gain=ctx.createGain();
+    gain.connect(ctx.destination);
+    [220,180].forEach(function(f,i){
+      var o=ctx.createOscillator();
+      o.connect(gain);
+      o.type="sawtooth";
+      o.frequency.setValueAtTime(f,ctx.currentTime+i*0.15);
+      gain.gain.setValueAtTime(0.2,ctx.currentTime+i*0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.15+0.18);
+      o.start(ctx.currentTime+i*0.15);
+      o.stop(ctx.currentTime+i*0.15+0.18);
+    });
+  }catch(e){}
+}
+
+function playSuspense(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var gain=ctx.createGain();
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.12,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.4);
+    var o=ctx.createOscillator();
+    o.connect(gain);
+    o.type="sine";
+    o.frequency.setValueAtTime(160,ctx.currentTime);
+    o.frequency.linearRampToValueAtTime(260,ctx.currentTime+1.4);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime+1.4);
+  }catch(e){}
+}
+```
+
+**Modify your `selectAnswer` function — add sound calls:**
+
+```javascript
+function selectAnswer(idx){
+  if(answered)return;
+  answered=true;
+  clearInterval(countdown);
+  var q=questions[currentQ];
+  var btns=document.querySelectorAll(".choice-btn");
+  lockChoices();
+  var fb=document.getElementById("feedback");
+  if(idx===q.answer){
+    playCorrect();
+    score+=1;
+    btns[idx].classList.add("correct");
+    fb.textContent="✅ Correct! "+q.explain;
+    fb.className="feedback correct";
+  }else{
+    playWrong();
+    btns[idx].classList.add("wrong");
+    if(btns[q.answer]){btns[q.answer].classList.add("correct");}
+    fb.textContent="❌ Wrong! "+q.explain;
+    fb.className="feedback wrong";
+  }
+  document.getElementById("score-display").textContent="Score: "+score;
+  setTimeout(advance,2800);
+}
+```
+
+**Modify only the suspense line inside `showResult` — add `playSuspense()` call:**
+
+```javascript
+document.getElementById("result-title").textContent="AI is analyzing your performance...";
+playSuspense();
