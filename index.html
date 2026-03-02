@@ -901,6 +901,7 @@ Challenge our AI across trivia, speed, memory, math, and more. Prove that human 
 🚀 Start Challenge 🏆 Leaderboard 
 
 
+
 <div class="stats-row" id="stats-row">
   <div class="stat-card">
     <div class="val" id="stat-games">0</div>
@@ -919,5 +920,281 @@ Challenge our AI across trivia, speed, memory, math, and more. Prove that human 
     <div class="lbl">Your Best Accuracy</div>
   </div>
 </div>
+
+<div class="section-title">Choose Your Challenge</div>
+<div class="section-sub">Six unique game modes — each with increasing AI difficulty</div>
+
+<div class="modes-grid">
+  <div class="mode-card" style="--mode-color: #6c63ff" onclick="startGameMode('trivia')">
+    <span class="mode-icon">🧩</span>
+    <div class="mode-title">Trivia Showdown</div>
+    <div class="mode-desc">Go head-to-head with AI across science, history, pop culture, and more. Who gets more right?</div>
+    <div class="mode-meta">
+      <span class="tag diff-medium">Medium</span>
+      <span class="tag">10 Questions</span>
+      <span class="tag">Timed</span>
+    </div>
+  </div>
+  <div class="mode-card" style="--mode-color: #43e97b" onclick="startGameMode('math')">
+    <span class="mode-icon">🔢</span>
+    <div class="mode-title">Math Blitz</div>
+    <div class="mode-desc">Race against the AI solving arithmetic and algebra problems. Speed and accuracy both count.</div>
+    <div class="mode-meta">
+      <span class="tag diff-hard">Hard</span>
+      <span class="tag">15 Problems</span>
+      <span class="tag">Speed</span>
+    </div>
+  </div>
+  <div class="mode-card" style="--mode-color: #ff6584" onclick="startGameMode('memory')">
+    <span class="mode-icon">🃏</span>
+    <div class="mode-title">Memory Match</div>
+    <div class="mode-desc">Flip cards to find matching pairs before the AI does. Test your short-term memory.</div>
+    <div class="mode-meta">
+      <span class="tag diff-easy">Easy</span>
+      <span class="tag">16 Cards</span>
+      <span class="tag">Classic</span>
+    </div>
+  </div>
+  <div class="mode-card" style="--mode-color: #ffd700" onclick="startGameMode('reaction')">
+    <span class="mode-icon">⚡</span>
+    <div class="mode-title">Reaction Speed</div>
+    <div class="mode-desc">When the box turns green — click as fast as you can. AI has a benchmark reaction time. Beat it!</div>
+    <div class="mode-meta">
+      <span class="tag diff-easy">Easy</span>
+      <span class="tag">5 Rounds</span>
+      <span class="tag">Reflex</span>
+    </div>
+  </div>
+  <div class="mode-card" style="--mode-color: #00d2ff" onclick="startGameMode('scramble')">
+    <span class="mode-icon">🔤</span>
+    <div class="mode-title">Word Scramble</div>
+    <div class="mode-desc">Unscramble words faster than the AI can decode the anagram. Vocabulary and speed required.</div>
+    <div class="mode-meta">
+      <span class="tag diff-medium">Medium</span>
+      <span class="tag">10 Words</span>
+      <span class="tag">Language</span>
+    </div>
+  </div>
+  <div class="mode-card" style="--mode-color: #ff9a9e" onclick="startGameMode('pattern')">
+    <span class="mode-icon">🔮</span>
+    <div class="mode-title">Pattern IQ</div>
+    <div class="mode-desc">Complete visual and logical sequences. A classic IQ-style test against AI pattern recognition.</div>
+    <div class="mode-meta">
+      <span class="tag diff-hard">Hard</span>
+      <span class="tag">12 Patterns</span>
+      <span class="tag">Logic</span>
+    </div>
+  </div>
+</div>
+�
+
+�
+
+�
+Trivia Showdown
+
+⏱ 15s
+
+⭐ 0
+
+🔥 0
+
+✕ Quit 
+
+
+<!-- TRIVIA -->
+<div id="trivia-game" style="display:none">
+  <div class="question-card">
+    <div class="question-num" id="q-num">Question 1 of 10</div>
+    <div class="question-text" id="q-text">Loading...</div>
+    <div class="question-hint" id="q-category"></div>
+  </div>
+  <div class="answers-grid" id="answers-grid"></div>
+  <div class="ai-panel">
+    <div class="ai-header">
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="ai-name">AI Opponent</div>
+        <div class="ai-status" id="ai-status">Analyzing question...</div>
+      </div>
+    </div>
+    <div id="ai-thinking-wrap"><div class="ai-thinking"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    <div class="ai-answer-reveal" id="ai-reveal" style="display:none"></div>
+  </div>
+</div>
+
+<!-- MATH -->
+<div id="math-game" style="display:none">
+  <div class="math-equation" id="math-eq">7 × 8 = ?</div>
+  <div class="math-choices" id="math-choices"></div>
+  <div class="ai-panel" style="margin-top:24px">
+    <div class="ai-header">
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="ai-name">AI Calculator</div>
+        <div class="ai-status" id="math-ai-status">Computing...</div>
+      </div>
+    </div>
+    <div id="math-ai-think"><div class="ai-thinking"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    <div id="math-ai-reveal" style="display:none" class="ai-answer-reveal"></div>
+  </div>
+</div>
+
+<!-- MEMORY -->
+<div id="memory-game" style="display:none">
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="color:var(--muted);font-size:0.9rem;">Your Moves: <strong id="memory-moves">0</strong> &nbsp;|&nbsp; AI Moves: <strong id="ai-memory-moves">0</strong></div>
+  </div>
+  <div class="memory-grid" id="memory-grid"></div>
+</div>
+
+<!-- REACTION -->
+<div id="reaction-game" style="display:none">
+  <div style="text-align:center;margin-bottom:20px;color:var(--muted);">
+    Round <span id="reaction-round">1</span> of 5 &nbsp;|&nbsp; AI Target: <span id="ai-reaction-target" style="color:var(--secondary)">220ms</span>
+  </div>
+  <div class="reaction-box wait" id="reaction-box" onclick="handleReactionClick()">
+    <span id="reaction-text">Wait for green...</span>
+  </div>
+  <div id="reaction-results" style="margin-top:20px;text-align:center;font-size:1.1rem;"></div>
+</div>
+
+<!-- SCRAMBLE -->
+<div id="scramble-game" style="display:none">
+  <div class="question-card">
+    <div class="question-num" id="scramble-num">Word 1 of 10</div>
+    <div class="question-hint">Unscramble the word below:</div>
+    <div class="scrambled-word" id="scrambled-word">EDCLO</div>
+    <div id="scramble-hint" style="color:var(--muted);font-size:0.85rem;margin-top:8px;"></div>
+  </div>
+  <div class="word-input-row">
+    <input class="word-input" id="word-input" type="text" placeholder="Type your answer..." autocomplete="off" autocorrect="off"/>
+    <button class="btn-primary" onclick="submitScramble()">Submit</button>
+  </div>
+  <div class="ai-panel">
+    <div class="ai-header">
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="ai-name">AI Linguist</div>
+        <div class="ai-status" id="scramble-ai-status">Decoding...</div>
+      </div>
+    </div>
+    <div id="scramble-ai-think"><div class="ai-thinking"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    <div id="scramble-ai-reveal" style="display:none" class="ai-answer-reveal"></div>
+  </div>
+</div>
+
+<!-- PATTERN -->
+<div id="pattern-game" style="display:none">
+  <div class="question-card">
+    <div class="question-num" id="pattern-num">Pattern 1 of 12</div>
+    <div class="question-text">What comes next in the sequence?</div>
+    <div class="pattern-display" id="pattern-display"></div>
+  </div>
+  <div class="pattern-choices" id="pattern-choices"></div>
+  <div class="ai-panel" style="margin-top:20px">
+    <div class="ai-header">
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="ai-name">AI Pattern Engine</div>
+        <div class="ai-status" id="pattern-ai-status">Analyzing sequence...</div>
+      </div>
+    </div>
+    <div id="pattern-ai-think"><div class="ai-thinking"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    <div id="pattern-ai-reveal" style="display:none" class="ai-answer-reveal"></div>
+  </div>
+</div>
+�
+
+�
+
+�
+🏆 
+
+You Won!
+
+You outscored the AI this round.
+
+🧠 You🤖 AI 
+
+50% 50% 
+
+🔄 Play Again 🏠 Home 📤 Share 
+
+
+<div id="xp-gain-banner" style="display:none;text-align:center;margin-top:24px;padding:20px;background:var(--card);border-radius:16px;border:1px solid rgba(108,99,255,0.2)">
+  <div style="font-size:1.1rem;font-weight:700;color:var(--primary)">+<span id="xp-gained">0</span> XP Earned!</div>
+  <div style="font-size:0.85rem;color:var(--muted);margin-top:4px">Level <span id="xp-level">1</span></div>
+  <div class="xp-bar-wrap" style="max-width:300px;margin:10px auto 0">
+    <div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div>
+  </div>
+</div>
+�
+
+�
+
+�
+🏆 Global Leaderboard
+
+Top players who've beaten the AI
+
+All Time Trivia Math Memory Reaction Scramble Pattern 
+
+
+�
+
+�
+🧠
+
+Player
+
+Level 1 • 0 XP
+
+0
+
+Games Played
+
+0
+
+Wins vs AI
+
+0
+
+Best Streak
+
+0
+
+Total Points
+
+🎖️ Achievements
+
+Unlock achievements by playing and winning
+
+
+�
+
+�
+👋 Who Are You?
+
+Set up your player profile to track scores and compete on the leaderboard.
+
+Your Name 
+
+Pick an Avatar 
+
+Difficulty 
+
+😊 Easy 😤 Medium 🔥 Hard 
+
+Cancel Let's Go! 🚀 
+
+
+�
+🧩 Trivia Showdown
+
+Loading...
+
+Cancel Start Game! 🎮 
+
 
 
