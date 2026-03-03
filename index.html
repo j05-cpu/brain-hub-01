@@ -1559,4 +1559,1099 @@ feedback-msg.correct { background: rgba(16,185,129,0.15); color: var(--accent-gr
     <div class="xp-gained-section">
       <div class="xp-gained-label">XP GAINED THIS ROUND</div>
       <div class="xp-gained-value" id="xp-gained-disp">+0 XP</div>
-      <div class="xp-gained-bar-
+      <div class="xp-gained-bar-track"><div class="xp-gained-bar-fill" id="xp-gained-fill"></div></div>
+    </div>
+    <div class="achievements-unlocked" id="achievements-unlocked-wrap"></div>
+    <div class="summary-actions">
+      <button class="btn-primary" id="play-again-btn" onclick="playAgain()">▶ PLAY AGAIN</button>
+      <button class="btn-secondary" onclick="showHome()">🏠 HOME</button>
+      <button class="btn-secondary" onclick="shareResult()">📤 SHARE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PROFILE SETUP MODAL
+     ============================================================ -->
+<div class="modal-overlay hidden" id="profile-modal">
+  <div class="modal-box">
+    <div class="modal-title">⚙ PLAYER PROFILE</div>
+    <div class="modal-sub">Set up your identity before challenging AI</div>
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <input class="form-input" id="profile-name" type="text" placeholder="Enter your name..." maxlength="20">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Avatar</label>
+      <div class="avatar-grid" id="avatar-grid"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Default Difficulty</label>
+      <div class="difficulty-selector">
+        <button class="diff-btn" onclick="selectDiff('easy', this)">😊 Easy</button>
+        <button class="diff-btn" onclick="selectDiff('medium', this)">😤 Medium</button>
+        <button class="diff-btn" onclick="selectDiff('hard', this)">😈 Hard</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:8px;">
+      <button class="btn-primary" style="flex:1;" onclick="saveProfile()">SAVE PROFILE</button>
+      <button class="btn-secondary" onclick="closeProfileModal()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOAST CONTAINER
+     ============================================================ -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// STATE MANAGEMENT
+// ============================================================
+const AVATARS = ['🦊','🐯','🦁','🐺','🦅','🤖','👾','🧙','🥷','🦸'];
+
+const state = {
+  profile: { name: 'Player', avatar: '🦊', difficulty: 'medium' },
+  stats: { gamesPlayed: 0, humanWins: 0, questionsAnswered: 0, totalCorrect: 0, bestAccuracy: 0 },
+  xp: 0,
+  level: 1,
+  achievements: [],
+  leaderboard: [
+    { name: 'NeuralSlayer', avatar:'🦁', score: 9840, wins: 47, level: 12 },
+    { name: 'AIKiller99', avatar:'🤖', score: 8720, wins: 38, level: 10 },
+    { name: 'BrainOverBits', avatar:'🧙', score: 7650, wins: 31, level: 9 },
+    { name: 'HumanFirst', avatar:'🦅', score: 6540, wins: 26, level: 8 },
+    { name: 'QuantumMind', avatar:'👾', score: 5980, wins: 21, level: 7 },
+  ],
+  currentGame: null,
+};
+
+// XP thresholds per level
+const XP_PER_LEVEL = 200;
+const XP_MULTIPLIER = 1.3;
+
+function xpForLevel(lvl) { return Math.floor(XP_PER_LEVEL * Math.pow(XP_MULTIPLIER, lvl - 1)); }
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+function saveState() {
+  try { localStorage.setItem('can_you_beat_ai', JSON.stringify({ profile: state.profile, stats: state.stats, xp: state.xp, level: state.level, achievements: state.achievements })); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem('can_you_beat_ai') || 'null');
+    if (d) {
+      state.profile = { ...state.profile, ...d.profile };
+      state.stats = { ...state.stats, ...d.stats };
+      state.xp = d.xp || 0;
+      state.level = d.level || 1;
+      state.achievements = d.achievements || [];
+    }
+  } catch(e) {}
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function showSection(id) {
+  ['home-screen','trivia-section','math-section','memory-section',
+   'reaction-section','word-section','pattern-section','summary-section'].forEach(s => {
+    document.getElementById(s).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showHome() {
+  clearAllTimers();
+  showSection('home-screen');
+  updateStats();
+  renderLeaderboard();
+}
+
+function clearAllTimers() {
+  if (state.currentGame && state.currentGame.timers) {
+    state.currentGame.timers.forEach(t => clearTimeout(t));
+    state.currentGame.timers = [];
+  }
+  if (state.currentGame && state.currentGame.intervalId) {
+    clearInterval(state.currentGame.intervalId);
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-games').textContent = state.stats.gamesPlayed;
+  document.getElementById('stat-wins').textContent = state.stats.humanWins;
+  document.getElementById('stat-questions').textContent = state.stats.questionsAnswered;
+  document.getElementById('stat-accuracy').textContent = state.stats.bestAccuracy + '%';
+  updateXPBar();
+}
+
+function updateXPBar() {
+  const maxXp = xpForLevel(state.level);
+  const pct = Math.min(100, (state.xp / maxXp) * 100);
+  document.getElementById('header-xp-fill').style.width = pct + '%';
+  document.getElementById('header-level').textContent = state.level;
+  document.getElementById('header-xp').textContent = state.xp;
+  document.getElementById('header-xp-max').textContent = maxXp;
+}
+
+function addXP(amount) {
+  const prevLevel = state.level;
+  state.xp += amount;
+  const maxXp = xpForLevel(state.level);
+  if (state.xp >= maxXp) {
+    state.xp -= maxXp;
+    state.level++;
+    showToast('🎉 Level Up! Now Level ' + state.level, 'achievement');
+  }
+  if (state.level > prevLevel) checkAchievements();
+  updateXPBar();
+  saveState();
+}
+
+function toast(msg, type = '') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.animation = 'slide-out-right 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+function showToast(msg, type) { toast(msg, type); }
+
+function setAiStatus(id, msg) { const el = document.getElementById(id); if (el) el.textContent = msg; }
+
+// ============================================================
+// PROFILE
+// ============================================================
+function showProfileModal() {
+  document.getElementById('profile-modal').classList.remove('hidden');
+  document.getElementById('profile-name').value = state.profile.name;
+  renderAvatarGrid();
+  // mark current difficulty
+  document.querySelectorAll('.diff-btn').forEach(b => b.className = 'diff-btn');
+  const dbtns = document.querySelectorAll('.diff-btn');
+  const diffMap = { easy: 0, medium: 1, hard: 2 };
+  dbtns[diffMap[state.profile.difficulty]].classList.add('active-' + state.profile.difficulty);
+}
+
+function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
+
+function renderAvatarGrid() {
+  const grid = document.getElementById('avatar-grid');
+  grid.innerHTML = '';
+  AVATARS.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'avatar-btn' + (a === state.profile.avatar ? ' selected' : '');
+    btn.textContent = a;
+    btn.onclick = () => {
+      document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function selectDiff(diff, el) {
+  document.querySelectorAll('.diff-btn').forEach(b => b.className = 'diff-btn');
+  el.classList.add('active-' + diff);
+  state.profile.difficulty = diff;
+}
+
+function saveProfile() {
+  const name = document.getElementById('profile-name').value.trim() || 'Player';
+  const selectedAvatar = document.querySelector('.avatar-btn.selected');
+  state.profile.name = name;
+  if (selectedAvatar) state.profile.avatar = selectedAvatar.textContent;
+  closeProfileModal();
+  saveState();
+  updateStats();
+  showToast('✅ Profile saved!', 'success');
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+function renderLeaderboard() {
+  const body = document.getElementById('leaderboard-body');
+  const playerEntry = {
+    name: state.profile.name + ' (You)',
+    avatar: state.profile.avatar,
+    score: state.stats.gamesPlayed * 100 + state.stats.humanWins * 200,
+    wins: state.stats.humanWins,
+    level: state.level,
+    isYou: true,
+  };
+  const all = [...state.leaderboard, playerEntry].sort((a,b) => b.score - a.score);
+  body.innerHTML = '';
+  all.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'lb-row' + (p.isYou ? ' lb-you' : '');
+    const rankColors = ['rank-1','rank-2','rank-3'];
+    const rankClass = i < 3 ? rankColors[i] : '';
+    const rankEmojis = ['🥇','🥈','🥉'];
+    const rankDisplay = i < 3 ? rankEmojis[i] : (i + 1);
+    row.innerHTML = `
+      <div class="lb-rank ${rankClass}">${rankDisplay}</div>
+      <div class="lb-name">${p.avatar} ${p.name}</div>
+      <div class="lb-score">${p.score.toLocaleString()}</div>
+      <div class="lb-wins text-green">${p.wins} W</div>
+      <div class="lb-level"><span class="lb-level-badge">LVL ${p.level}</span></div>
+    `;
+    body.appendChild(row);
+  });
+}
+
+// ============================================================
+// ACHIEVEMENTS
+// ============================================================
+const ACHIEVEMENT_DEFS = [
+  { id: 'first_win', label: '🏆 First Win', check: (s) => s.humanWins >= 1 },
+  { id: 'five_wins', label: '🔥 Win Streak', check: (s) => s.humanWins >= 5 },
+  { id: 'ten_games', label: '🎮 Veteran', check: (s) => s.gamesPlayed >= 10 },
+  { id: 'accuracy_80', label: '🎯 Sharpshooter', check: (s) => s.bestAccuracy >= 80 },
+  { id: 'questions_50', label: '📚 Scholar', check: (s) => s.questionsAnswered >= 50 },
+  { id: 'level_5', label: '⭐ Rising Star', check: () => state.level >= 5 },
+];
+
+function checkAchievements() {
+  const newOnes = [];
+  ACHIEVEMENT_DEFS.forEach(a => {
+    if (!state.achievements.includes(a.id) && a.check(state.stats)) {
+      state.achievements.push(a.id);
+      newOnes.push(a.label);
+    }
+  });
+  if (newOnes.length) {
+    newOnes.forEach(a => showToast('🏅 Achievement: ' + a, 'achievement'));
+    saveState();
+  }
+  return newOnes;
+}
+
+// ============================================================
+// GAME ROUTER
+// ============================================================
+function startGame(mode) {
+  clearAllTimers();
+  state.currentGame = { mode, timers: [], intervalId: null };
+  switch(mode) {
+    case 'trivia': startTrivia(); break;
+    case 'math': startMath(); break;
+    case 'memory': startMemory(); break;
+    case 'reaction': startReaction(); break;
+    case 'word': startWord(); break;
+    case 'pattern': startPattern(); break;
+  }
+}
+
+function playAgain() { startGame(state.currentGame ? state.currentGame.mode : 'trivia'); }
+
+function endGame(playerScore, aiScore, totalQ, correctQ, xpGain) {
+  clearAllTimers();
+  const won = playerScore > aiScore;
+  const tied = playerScore === aiScore;
+  state.stats.gamesPlayed++;
+  if (won) state.stats.humanWins++;
+  state.stats.questionsAnswered += totalQ;
+  state.stats.totalCorrect += correctQ;
+  const accuracy = totalQ > 0 ? Math.round((correctQ / totalQ) * 100) : 0;
+  if (accuracy > state.stats.bestAccuracy) state.stats.bestAccuracy = accuracy;
+  addXP(xpGain);
+  saveState();
+  checkAchievements();
+  // Build summary
+  document.getElementById('result-icon').textContent = won ? '🏆' : (tied ? '🤝' : '🤖');
+  document.getElementById('result-title').textContent = won ? 'YOU WIN!' : (tied ? "IT'S A TIE!" : 'AI WINS!');
+  document.getElementById('result-subtitle').textContent = won ? 'You proved humans can beat AI!' : (tied ? 'An even match!' : 'The machine was stronger this time...');
+  document.getElementById('result-title').style.color = won ? 'var(--accent-green)' : (tied ? 'var(--accent-gold)' : 'var(--accent-red)');
+  document.getElementById('sum-player-label').textContent = state.profile.name;
+  document.getElementById('sum-player-score').textContent = playerScore;
+  document.getElementById('sum-ai-score').textContent = aiScore;
+  document.getElementById('sum-player-sub').textContent = accuracy + '% accuracy';
+  document.getElementById('xp-gained-disp').textContent = '+' + xpGain + ' XP';
+  document.getElementById('play-again-btn').setAttribute('data-mode', state.currentGame ? state.currentGame.mode : '');
+  // Animate XP bar
+  setTimeout(() => {
+    document.getElementById('xp-gained-fill').style.width = Math.min(100, xpGain / 2) + '%';
+  }, 300);
+  // Achievements display
+  const newAch = checkAchievements();
+  const achWrap = document.getElementById('achievements-unlocked-wrap');
+  if (newAch.length) {
+    achWrap.innerHTML = `<h4>🎉 ACHIEVEMENTS UNLOCKED</h4><div class="achievement-chips">${newAch.map(a=>`<span class="achievement-chip">${a}</span>`).join('')}</div>`;
+  } else { achWrap.innerHTML = ''; }
+  showSection('summary-section');
+  updateStats();
+  renderLeaderboard();
+}
+
+function shareResult() {
+  const text = `I just played Can You Beat AI? My score: ${document.getElementById('sum-player-score').textContent} vs AI's ${document.getElementById('sum-ai-score').textContent}! 🤖⚡ Challenge accepted!`;
+  if (navigator.share) { navigator.share({ title: 'Can You Beat AI?', text }); }
+  else { navigator.clipboard.writeText(text).then(() => showToast('📋 Result copied!', 'success')); }
+}
+
+// ============================================================
+// AI DIFFICULTY CONFIG
+// ============================================================
+function getAIConfig() {
+  const diff = state.profile.difficulty;
+  return {
+    easy: { accuracy: 0.55, speedMin: 8000, speedMax: 15000 },
+    medium: { accuracy: 0.72, speedMin: 4000, speedMax: 9000 },
+    hard: { accuracy: 0.88, speedMin: 2000, speedMax: 5000 },
+  }[diff] || { accuracy: 0.72, speedMin: 4000, speedMax: 9000 };
+}
+
+function aiAnswerDelay() {
+  const cfg = getAIConfig();
+  return cfg.speedMin + Math.random() * (cfg.speedMax - cfg.speedMin);
+}
+
+function aiGetsItRight() { return Math.random() < getAIConfig().accuracy; }
+
+// ============================================================
+// TRIVIA GAME
+// ============================================================
+const TRIVIA_QUESTIONS = [
+  { category:'Science', q:'What is the chemical symbol for gold?', options:['Au','Ag','Go','Gd'], answer:'Au', hint:'Latin: Aurum' },
+  { category:'History', q:'In what year did World War II end?', options:['1943','1944','1945','1946'], answer:'1945', hint:'After atomic bombs were dropped' },
+  { category:'Pop Culture', q:'Which band performed "Bohemian Rhapsody"?', options:['Led Zeppelin','Queen','The Beatles','Pink Floyd'], answer:'Queen', hint:'British rock band' },
+  { category:'Science', q:'How many planets are in our solar system?', options:['7','8','9','10'], answer:'8', hint:'Pluto is not counted' },
+  { category:'Geography', q:'What is the capital of Australia?', options:['Sydney','Melbourne','Brisbane','Canberra'], answer:'Canberra', hint:'Not the largest city' },
+  { category:'Science', q:'What gas do plants absorb from the atmosphere?', options:['Oxygen','Nitrogen','Carbon Dioxide','Hydrogen'], answer:'Carbon Dioxide', hint:'Used in photosynthesis' },
+  { category:'Math', q:'What is the square root of 144?', options:['11','12','13','14'], answer:'12', hint:'12 × 12 = ?' },
+  { category:'History', q:'Who was the first US President?', options:['Abraham Lincoln','Thomas Jefferson','George Washington','John Adams'], answer:'George Washington', hint:'On the one-dollar bill' },
+  { category:'Science', q:'What is the speed of light (approximately)?', options:['200,000 km/s','300,000 km/s','400,000 km/s','500,000 km/s'], answer:'300,000 km/s', hint:'~186,000 miles per second' },
+  { category:'Pop Culture', q:'Which movie features the line "May the Force be with you"?', options:['Star Trek','Star Wars','Dune','Avatar'], answer:'Star Wars', hint:'George Lucas creation' },
+  { category:'Science', q:'What organ produces insulin?', options:['Liver','Kidney','Pancreas','Stomach'], answer:'Pancreas', hint:'Located behind the stomach' },
+  { category:'Geography', q:'Which is the longest river in the world?', options:['Amazon','Mississippi','Yangtze','Nile'], answer:'Nile', hint:'Flows through Egypt' },
+];
+
+let triviaGame = {};
+
+function startTrivia() {
+  const q = shuffleArr([...TRIVIA_QUESTIONS]).slice(0, 10);
+  triviaGame = { questions: q, current: 0, playerScore: 0, aiScore: 0, correct: 0, timerId: null, timerInt: null, locked: false };
+  state.currentGame.timers = [];
+  document.getElementById('triv-player-name').textContent = state.profile.avatar + ' ' + state.profile.name;
+  showSection('trivia-section');
+  loadTriviaQuestion();
+}
+
+function loadTriviaQuestion() {
+  const g = triviaGame;
+  if (g.current >= g.questions.length) { endTriviaGame(); return; }
+  const q = g.questions[g.current];
+  g.locked = false;
+  document.getElementById('triv-q-num').textContent = g.current + 1;
+  document.getElementById('triv-category').textContent = q.category.toUpperCase();
+  document.getElementById('triv-question').textContent = q.q;
+  document.getElementById('triv-hint').textContent = '💡 ' + q.hint;
+  document.getElementById('triv-player-score').textContent = g.playerScore;
+  document.getElementById('triv-ai-score').textContent = g.aiScore;
+  document.getElementById('triv-streak').textContent = g.streak ? g.streak + '🔥' : '0';
+  document.getElementById('triv-ps2').textContent = g.playerScore;
+  document.getElementById('triv-as2').textContent = g.aiScore;
+  document.getElementById('triv-feedback').classList.add('hidden');
+  // Render options
+  const opts = shuffleArr([...q.options]);
+  const container = document.getElementById('triv-options');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => selectTriviaAnswer(opt, q.answer);
+    container.appendChild(btn);
+  });
+  // Start timer
+  startTriviaTimer(30);
+  // AI answer
+  scheduleAIAnswer(() => {
+    if (!g.locked) {
+      if (aiGetsItRight()) {
+        g.aiScore++;
+        document.getElementById('triv-as2').textContent = g.aiScore;
+        document.getElementById('triv-ai-score').textContent = g.aiScore;
+        setAiStatus('triv-ai-status', '✅ Got it!');
+      } else { setAiStatus('triv-ai-status', '❌ Wrong!'); }
+    }
+  }, 30000);
+}
+
+function startTriviaTimer(seconds) {
+  clearInterval(triviaGame.timerInt);
+  let t = seconds;
+  const circle = document.getElementById('triv-timer-circle');
+  const numEl = document.getElementById('triv-timer');
+  const circumference = 2 * Math.PI * 36;
+  circle.style.strokeDashoffset = 0;
+  numEl.textContent = t;
+  triviaGame.timerInt = setInterval(() => {
+    t--;
+    numEl.textContent = t;
+    const progress = (seconds - t) / seconds;
+    circle.style.strokeDashoffset = circumference * progress;
+    if (t <= 5) { circle.style.stroke = 'var(--accent-red)'; numEl.style.color = 'var(--accent-red)'; }
+    if (t <= 0) {
+      clearInterval(triviaGame.timerInt);
+      circle.style.stroke = 'var(--accent-primary)';
+      numEl.style.color = 'var(--accent-primary)';
+      if (!triviaGame.locked) { triviaGame.locked = true; showTriviaFeedback(false, 'Time\'s up! The answer was: ' + triviaGame.questions[triviaGame.current].answer); nextTriviaQ(1500); }
+    }
+  }, 1000);
+  state.currentGame.timers.push(triviaGame.timerInt);
+}
+
+function scheduleAIAnswer(cb, maxMs) {
+  const delay = Math.min(aiAnswerDelay(), maxMs - 500);
+  const t = setTimeout(cb, delay);
+  state.currentGame.timers.push(t);
+}
+
+function selectTriviaAnswer(selected, correct) {
+  if (triviaGame.locked) return;
+  triviaGame.locked = true;
+  clearInterval(triviaGame.timerInt);
+  const opts = document.querySelectorAll('#triv-options .option-btn');
+  opts.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+    else if (b.textContent === selected) b.classList.add('incorrect');
+  });
+  const isCorrect = selected === correct;
+  if (isCorrect) {
+    triviaGame.correct++;
+    triviaGame.playerScore += 10;
+    triviaGame.streak = (triviaGame.streak || 0) + 1;
+    showTriviaFeedback(true, '✅ Correct! +10 points');
+  } else {
+    triviaGame.streak = 0;
+    showTriviaFeedback(false, '❌ Wrong! The answer was: ' + correct);
+  }
+  document.getElementById('triv-player-score').textContent = triviaGame.playerScore;
+  document.getElementById('triv-ps2').textContent = triviaGame.playerScore;
+  const acc = Math.round((triviaGame.correct / (triviaGame.current + 1)) * 100);
+  document.getElementById('triv-accuracy-disp').textContent = 'Accuracy: ' + acc + '%';
+  nextTriviaQ(1500);
+}
+
+function showTriviaFeedback(correct, msg) {
+  const el = document.getElementById('triv-feedback');
+  el.className = 'feedback-msg ' + (correct ? 'correct' : 'incorrect');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function nextTriviaQ(delay) {
+  const t = setTimeout(() => { triviaGame.current++; loadTriviaQuestion(); }, delay);
+  state.currentGame.timers.push(t);
+}
+
+function endTriviaGame() {
+  const g = triviaGame;
+  endGame(g.playerScore, g.aiScore, g.questions.length, g.correct, Math.max(10, g.playerScore + (g.playerScore > g.aiScore ? 50 : 10)));
+}
+
+// ============================================================
+// MATH GAME
+// ============================================================
+function genMathProblem() {
+  const types = ['add','sub','mul','div','sq'];
+  const t = types[Math.floor(Math.random() * types.length)];
+  let q, a;
+  switch(t) {
+    case 'add': { const a1 = rnd(10, 99), b1 = rnd(10, 99); q = `${a1} + ${b1}`; a = a1+b1; break; }
+    case 'sub': { const a2 = rnd(20, 99), b2 = rnd(5, a2); q = `${a2} − ${b2}`; a = a2-b2; break; }
+    case 'mul': { const a3 = rnd(2, 12), b3 = rnd(2, 12); q = `${a3} × ${b3}`; a = a3*b3; break; }
+    case 'div': { const b4 = rnd(2, 9), a4 = b4 * rnd(2, 9); q = `${a4} ÷ ${b4}`; a = a4/b4; break; }
+    case 'sq': { const x = rnd(5, 15); q = `${x}²`; a = x*x; break; }
+    default: q = '2+2'; a = 4;
+  }
+  return { q, answer: a };
+}
+
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+let mathGame = {};
+
+function startMath() {
+  mathGame = { problems: [], current: 0, playerScore: 0, aiScore: 0, correct: 0, timerId: null, locked: false };
+  for (let i = 0; i < 15; i++) mathGame.problems.push(genMathProblem());
+  document.getElementById('math-player-name').textContent = state.profile.avatar + ' ' + state.profile.name;
+  showSection('math-section');
+  loadMathProblem();
+}
+
+function loadMathProblem() {
+  const g = mathGame;
+  if (g.current >= g.problems.length) { endMathGame(); return; }
+  const p = g.problems[g.current];
+  g.locked = false;
+  document.getElementById('math-q-num').textContent = g.current + 1;
+  document.getElementById('math-question').textContent = p.q + ' = ?';
+  document.getElementById('math-input').value = '';
+  document.getElementById('math-input').focus();
+  document.getElementById('math-feedback').classList.add('hidden');
+  document.getElementById('math-player-score').textContent = g.playerScore;
+  document.getElementById('math-ai-score').textContent = g.aiScore;
+  document.getElementById('math-ps2').textContent = g.playerScore;
+  document.getElementById('math-as2').textContent = g.aiScore;
+  startMathTimer(20);
+  scheduleAIAnswer(() => {
+    if (!g.locked) {
+      if (aiGetsItRight()) {
+        g.aiScore++;
+        document.getElementById('math-ai-score').textContent = g.aiScore;
+        document.getElementById('math-as2').textContent = g.aiScore;
+        setAiStatus('math-ai-status', '✅ Computed!');
+      } else { setAiStatus('math-ai-status', '❌ Error!'); }
+    }
+  }, 20000);
+}
+
+function startMathTimer(seconds) {
+  clearInterval(mathGame.timerInt);
+  let t = seconds;
+  document.getElementById('math-timer').textContent = t;
+  mathGame.timerInt = setInterval(() => {
+    t--;
+    document.getElementById('math-timer').textContent = t;
+    document.getElementById('math-timer').style.color = t <= 5 ? 'var(--accent-red)' : 'var(--accent-primary)';
+    if (t <= 0) {
+      clearInterval(mathGame.timerInt);
+      if (!mathGame.locked) { mathGame.locked = true; showMathFeedback(false, "⏰ Time's up! Answer: " + mathGame.problems[mathGame.current].answer); setTimeout(() => { mathGame.current++; loadMathProblem(); }, 1500); }
+    }
+  }, 1000);
+  state.currentGame.timers.push(mathGame.timerInt);
+}
+
+function submitMath() {
+  if (mathGame.locked) return;
+  const input = document.getElementById('math-input').value.trim();
+  if (!input) return;
+  mathGame.locked = true;
+  clearInterval(mathGame.timerInt);
+  const answer = parseFloat(input);
+  const correct = answer === mathGame.problems[mathGame.current].answer;
+  if (correct) { mathGame.correct++; mathGame.playerScore += 10; showMathFeedback(true, '✅ Correct! +10'); }
+  else { showMathFeedback(false, '❌ Wrong! Answer was: ' + mathGame.problems[mathGame.current].answer); }
+  document.getElementById('math-player-score').textContent = mathGame.playerScore;
+  document.getElementById('math-ps2').textContent = mathGame.playerScore;
+  setTimeout(() => { mathGame.current++; loadMathProblem(); }, 1500);
+}
+
+function showMathFeedback(correct, msg) {
+  const el = document.getElementById('math-feedback');
+  el.className = 'feedback-msg ' + (correct ? 'correct' : 'incorrect');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function endMathGame() {
+  const g = mathGame;
+  endGame(g.playerScore, g.aiScore, g.problems.length, g.correct, Math.max(10, g.playerScore + (g.playerScore > g.aiScore ? 50 : 10)));
+}
+
+// ============================================================
+// MEMORY GAME
+// ============================================================
+const MEMORY_EMOJIS = ['🦊','🐯','🦁','🐺','🦅','🤖','👾','🧙'];
+
+let memGame = {};
+
+function startMemory() {
+  const pairs = [...MEMORY_EMOJIS, ...MEMORY_EMOJIS];
+  const shuffled = shuffleArr(pairs);
+  memGame = { cards: shuffled.map((e, i) => ({ emoji: e, id: i, flipped: false, matched: false })), flipped: [], moves: 0, pairs: 0, aiMoves: 0, aiPairs: 0, locked: false, startTime: Date.now(), timerInt: null };
+  document.getElementById('mem-player-name').textContent = state.profile.avatar + ' ' + state.profile.name;
+  showSection('memory-section');
+  renderMemoryGrid();
+  startMemTimer();
+  scheduleAIMemory();
+}
+
+function renderMemoryGrid() {
+  const grid = document.getElementById('memory-grid');
+  grid.innerHTML = '';
+  memGame.cards.forEach((card, idx) => {
+    const el = document.createElement('div');
+    el.className = 'memory-card' + (card.flipped || card.matched ? ' flipped' : '') + (card.matched ? ' matched' : '');
+    el.innerHTML = `
+      <div class="card-face card-back">${card.emoji}</div>
+      <div class="card-face card-front">?</div>
+    `;
+    el.onclick = () => flipMemCard(idx);
+    grid.appendChild(el);
+  });
+}
+
+function flipMemCard(idx) {
+  const g = memGame;
+  if (g.locked || g.cards[idx].flipped || g.cards[idx].matched) return;
+  g.cards[idx].flipped = true;
+  g.flipped.push(idx);
+  renderMemoryGrid();
+  if (g.flipped.length === 2) {
+    g.locked = true;
+    g.moves++;
+    document.getElementById('mem-moves').textContent = g.moves;
+    const [a, b] = g.flipped;
+    if (g.cards[a].emoji === g.cards[b].emoji) {
+      g.cards[a].matched = g.cards[b].matched = true;
+      g.pairs++;
+      g.flipped = [];
+      g.locked = false;
+      document.getElementById('mem-pairs').textContent = g.pairs + '/8';
+      document.getElementById('mem-ps2').textContent = g.pairs + ' pairs';
+      if (g.pairs >= 8) { endMemoryGame(); return; }
+      renderMemoryGrid();
+    } else {
+      setTimeout(() => {
+        g.cards[a].flipped = g.cards[b].flipped = false;
+        g.flipped = [];
+        g.locked = false;
+        renderMemoryGrid();
+      }, 900);
+    }
+  }
+}
+
+function startMemTimer() {
+  clearInterval(memGame.timerInt);
+  memGame.timerInt = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - memGame.startTime) / 1000);
+    document.getElementById('mem-time').textContent = elapsed + 's';
+  }, 1000);
+  state.currentGame.timers.push(memGame.timerInt);
+}
+
+function scheduleAIMemory() {
+  // AI makes moves periodically
+  const cfg = getAIConfig();
+  const makeAIMove = () => {
+    if (memGame.pairs >= 8) return;
+    memGame.aiMoves++;
+    document.getElementById('mem-ai-moves').textContent = memGame.aiMoves;
+    if (Math.random() < cfg.accuracy) {
+      memGame.aiPairs++;
+      document.getElementById('mem-as2').textContent = memGame.aiPairs + ' pairs';
+      setAiStatus('mem-ai-status', '✅ Match found!');
+    } else { setAiStatus('mem-ai-status', '🔄 Thinking...'); }
+    const delay = cfg.speedMin + Math.random() * (cfg.speedMax - cfg.speedMin);
+    const t = setTimeout(makeAIMove, delay);
+    state.currentGame.timers.push(t);
+  };
+  const t = setTimeout(makeAIMove, 3000);
+  state.currentGame.timers.push(t);
+}
+
+function endMemoryGame() {
+  clearInterval(memGame.timerInt);
+  const g = memGame;
+  const playerScore = Math.max(0, 800 - g.moves * 10);
+  const aiScore = Math.max(0, 800 - g.aiMoves * 10);
+  endGame(playerScore, aiScore, 8, g.pairs, g.pairs >= 8 ? 80 : 40);
+}
+
+// ============================================================
+// REACTION GAME
+// ============================================================
+let reactGame = {};
+let reactionTimeout = null;
+let reactionStart = null;
+let waitingForClick = false;
+
+function startReaction() {
+  reactGame = { round: 1, playerWins: 0, aiWins: 0, times: [], state: 'idle' };
+  document.getElementById('react-player-name').textContent = state.profile.avatar + ' ' + state.profile.name;
+  document.getElementById('react-round').textContent = 1;
+  document.getElementById('react-player-wins').textContent = 0;
+  document.getElementById('react-ai-wins').textContent = 0;
+  document.getElementById('react-avg').textContent = '-';
+  document.getElementById('react-ps2').textContent = '0 wins';
+  document.getElementById('react-as2').textContent = '0 wins';
+  document.getElementById('react-history').innerHTML = '';
+  document.getElementById('react-start-btn').disabled = false;
+  setReactionState('idle', '⏳', 'Click START ROUND to begin', 'Wait for the green signal');
+  showSection('reaction-section');
+}
+
+function setReactionState(s, icon, prompt, sub) {
+  reactGame.state = s;
+  const area = document.getElementById('reaction-area');
+  area.className = 'reaction-area ' + s;
+  document.getElementById('react-icon').textContent = icon;
+  document.getElementById('react-prompt').textContent = prompt;
+  document.getElementById('react-sub').textContent = sub;
+  document.getElementById('react-time-disp').classList.add('hidden');
+}
+
+function startReactionRound() {
+  if (reactGame.state !== 'idle') return;
+  document.getElementById('react-start-btn').disabled = true;
+  setReactionState('ready', '🔴', 'WAIT...', 'Do NOT click yet!');
+  waitingForClick = false;
+  const delay = 1500 + Math.random() * 4000;
+  reactionTimeout = setTimeout(() => {
+    setReactionState('go', '🟢', 'CLICK NOW!', '');
+    reactionStart = Date.now();
+    waitingForClick = true;
+    // AI reaction
+    const aiTime = 120 + Math.random() * (getAIConfig().accuracy > 0.8 ? 80 : 200);
+    const t = setTimeout(() => { if (waitingForClick) aiReactionResult(aiTime); }, aiTime);
+    state.currentGame.timers.push(t);
+    // Timeout if user doesn't click
+    const tout = setTimeout(() => {
+      if (waitingForClick) { handleReactionClick(); }
+    }, 3000);
+    state.currentGame.timers.push(tout);
+  }, delay);
+  state.currentGame.timers.push(reactionTimeout);
+}
+
+function handleReactionClick() {
+  if (reactGame.state === 'ready') {
+    clearTimeout(reactionTimeout);
+    setReactionState('idle', '❌', 'Too early! -1 point', 'Wait for green!');
+    reactGame.aiWins++;
+    document.getElementById('react-ai-wins').textContent = reactGame.aiWins;
+    document.getElementById('react-as2').textContent = reactGame.aiWins + ' wins';
+    waitingForClick = false;
+    addReactionHistory('TOO EARLY', false);
+    advanceReactionRound();
+    return;
+  }
+  if (reactGame.state !== 'go' || !waitingForClick) return;
+  waitingForClick = false;
+  const elapsed = Date.now() - reactionStart;
+  reactGame.times.push(elapsed);
+  const timeDisp = document.getElementById('react-time-disp');
+  timeDisp.textContent = elapsed + 'ms';
+  timeDisp.classList.remove('hidden');
+  // Will compare with AI in aiReactionResult
+  document.getElementById('react-round').textContent = reactGame.round;
+}
+
+function aiReactionResult(aiTime) {
+  const playerTime = reactGame.times[reactGame.times.length - 1];
+  if (playerTime === undefined) {
+    // AI was faster, player didn't click yet
+    return;
+  }
+  const playerWon = playerTime < aiTime;
+  if (playerWon) {
+    reactGame.playerWins++;
+    document.getElementById('react-player-wins').textContent = reactGame.playerWins;
+    document.getElementById('react-ps2').textContent = reactGame.playerWins + ' wins';
+    setAiStatus('react-ai-status', 'You were faster!');
+  } else {
+    reactGame.aiWins++;
+    document.getElementById('react-ai-wins').textContent = reactGame.aiWins;
+    document.getElementById('react-as2').textContent = reactGame.aiWins + ' wins';
+    setAiStatus('react-ai-status', 'AI: ' + Math.round(aiTime) + 'ms');
+  }
+  const avg = reactGame.times.length ? Math.round(reactGame.times.reduce((a,b)=>a+b,0)/reactGame.times.length) : 0;
+  document.getElementById('react-avg').textContent = avg + 'ms';
+  setReactionState('idle', playerWon ? '🏆' : '🤖', playerWon ? 'You win this round!' : 'AI wins this round!', `Your: ${playerTime}ms | AI: ${Math.round(aiTime)}ms`);
+  addReactionHistory(playerTime + 'ms', playerWon);
+  advanceReactionRound();
+}
+
+function addReactionHistory(label, won) {
+  const hist = document.getElementById('react-history');
+  const chip = document.createElement('div');
+  chip.className = 'reaction-chip';
+  chip.style.borderColor = won ? 'var(--accent-green)' : 'var(--accent-red)';
+  chip.style.color = won ? 'var(--accent-green)' : 'var(--accent-red)';
+  chip.textContent = 'R' + reactGame.round + ': ' + label;
+  hist.appendChild(chip);
+}
+
+function advanceReactionRound() {
+  if (reactGame.round >= 5) {
+    const t = setTimeout(() => {
+      const ps = reactGame.playerWins * 20;
+      const as = reactGame.aiWins * 20;
+      endGame(ps, as, 5, reactGame.playerWins, reactGame.playerWins * 20);
+    }, 1500);
+    state.currentGame.timers.push(t);
+    return;
+  }
+  reactGame.round++;
+  document.getElementById('react-round').textContent = reactGame.round;
+  const t = setTimeout(() => {
+    document.getElementById('react-start-btn').disabled = false;
+  }, 1500);
+  state.currentGame.timers.push(t);
+}
+
+// ============================================================
+// WORD SCRAMBLE GAME
+// ============================================================
+const WORD_LIST = [
+  { word: 'ELEPHANT', hint: 'Large African animal', category: 'Animals' },
+  { word: 'PUZZLE', hint: 'Something you solve', category: 'Games' },
+  { word: 'JOURNEY', hint: 'A long trip or expedition', category: 'Travel' },
+  { word: 'QUANTUM', hint: 'Physics term for smallest unit', category: 'Science' },
+  { word: 'BRIDGE', hint: 'Connects two sides', category: 'Architecture' },
+  { word: 'MYSTERY', hint: 'An unsolved riddle', category: 'Literature' },
+  { word: 'VOLCANO', hint: 'Erupts with lava', category: 'Geography' },
+  { word: 'DOLPHIN', hint: 'Intelligent sea mammal', category: 'Animals' },
+  { word: 'LIBRARY', hint: 'Where books live', category: 'Education' },
+  { word: 'CRYSTAL', hint: 'A transparent mineral structure', category: 'Science' },
+  { word: 'GALAXY', hint: 'Billions of stars', category: 'Astronomy' },
+  { word: 'PENGUIN', hint: 'Tuxedo-wearing bird', category: 'Animals' },
+];
+
+function scramble(word) {
+  let arr = word.split('');
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  const result = arr.join('');
+  return result === word ? scramble(word) : result;
+}
+
+let wordGame = {};
+
+function startWord() {
+  const words = shuffleArr([...WORD_LIST]).slice(0, 10);
+  wordGame = { words, current: 0, playerScore: 0, aiScore: 0, correct: 0, locked: false, timerInt: null };
+  document.getElementById('word-player-name').textContent = state.profile.avatar + ' ' + state.profile.name;
+  showSection('word-section');
+  loadWordQuestion();
+}
+
+function loadWordQuestion() {
+  const g = wordGame;
+  if (g.current >= g.words.length) { endWordGame(); return; }
+  const w = g.words[g.current];
+  g.locked = false;
+  document.getElementById('word-q-num').textContent = g.current + 1;
+  document.getElementById('word-scrambled').textContent = scramble(w.word);
+  document.getElementById('word-hint').textContent = '💡 ' + w.hint + ' [' + w.category + ']';
+  document.getElementById('word-input').value = '';
+  document.getElementById('word-input').focus();
+  document.getElementById('word-feedback').classList.add('hidden');
+  document.getElementById('word-player-score').textContent = g.playerScore;
+  document.getElementById('word-ai-score').textContent = g.aiScore;
+  document.getElementById('word-ps2').textContent = g.playerScore;
+  document.getElementById('word-as2').textContent = g.aiScore;
+  startWordTimer(25);
+  scheduleAIAnswer(() => {
+    if (!g.locked) {
+      if (aiGetsItRight()) { g.aiScore++; document.getElementById('word-ai-score').textContent = g.aiScore; document.getElementById('word-as2').textContent = g.aiScore; setAiStatus('word-ai-status', '✅ Decoded!'); }
+      else { setAiStatus('word-ai-status', '❌ Confused!'); }
+    }
+  }, 25000);
+}
+
+function startWordTimer(seconds) {
+  clearInterval(wordGame.timerInt);
+  let t = seconds;
+  document.getElementById('word-timer').textContent = t;
+  wordGame.timerInt = setInterval(() => {
+    t--;
+    document.getElementById('word-timer').textContent = t;
+    document.getElementById('word-timer').style.color = t <= 5 ? 'var(--accent-red)' : 'var(--accent-primary)';
+    if (t <= 0) {
+      clearInterval(wordGame.timerInt);
+      if (!wordGame.locked) { wordGame.locked = true; showWordFeedback(false, "⏰ Time's up! Word was: " + wordGame.words[wordGame.current].word); const t2 = setTimeout(() => { wordGame.current++; loadWordQuestion(); }, 1500); state.currentGame.timers.push(t2); }
+    }
+  }, 1000);
+  state.currentGame.timers.push(wordGame.timerInt);
+}
+
+function submitWord() {
+  if (wordGame.locked) return;
+  const input = document.getElementById('word-input').value.trim().toUpperCase();
+  if (!input) return;
+  wordGame.locked = true;
+  clearInterval(wordGame.timerInt);
+  const correct = input === wordGame.words[wordGame.current].word;
+  if (correct) { wordGame.correct++; wordGame.playerScore += 10; showWordFeedback(true, '✅ Correct! +10'); }
+  else { showWordFeedback(false, '❌ Wrong! Answer: ' + wordGame.words[wordGame.current].word); }
+  document.getElementById('word-player-score').textContent = wordGame.playerScore;
+  document.getElementById('word-ps2').textContent = wordGame.playerScore;
+  const t = setTimeout(() => { wordGame.current++; loadWordQuestion(); }, 1500);
+  state.currentGame.timers.push(t);
+}
+
+function showWordFeedback(correct, msg) {
+  const el = document.getElementById('word-feedback');
+  el.className = 'feedback-msg ' + (correct ? 'correct' : 'incorrect');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function endWordGame() {
+  const g = wordGame;
+  endGame(g.playerScore, g.aiScore, g.words.length, g.correct, Math.max(10, g.playerScore + (g.playerScore > g.aiScore ? 50 : 10)));
+}
+
+// ============================================================
+// PATTERN GAME
+// ============================================================
+const PATTERNS = [
+  { seq: [2, 4, 6, 8], answer: 10, options: [9, 10, 12, 11], hint: 'Add 2 each time' },
+  { seq: [1, 4, 9, 16], answer: 25, options: [24, 25, 26, 36], hint: 'Square numbers: 1², 2², 3²...' },
+  { seq: [3, 6, 12, 24], answer: 48, options: [36, 42, 48, 50], hint: 'Double each time' },
+  { seq: [100, 50, 25], answer: 12.5, options: [10, 12, 12.5, 15], hint: 'Divide by 2 each time' },
+  { seq: [1, 1, 2, 3, 5, 8], answer: 13, options: [11, 12, 13, 14], hint: 'Fibonacci: sum of previous two' },
+  { seq: [5, 10, 20, 40], answer: 80, options: [60, 70, 80, 100], hint: 'Multiply by 2' },
+  { seq: [7, 14, 21, 28], answer: 35, options: [32, 33, 35, 42], hint: 'Multiples of 7' },
+  { seq: [81, 27, 9, 3], answer: 1, options: [0, 1, 2, 3], hint: 'Divide by 3 each time' },
+  { seq: [2, 6, 12, 20], answer: 30, options: [24, 28, 30, 36], hint: 'Differences: 4, 6, 8, 10...' },
+  { seq: [10, 9, 7, 4], answer: 0, options: [-1, 0, 1, 2], hint: 'Subtract 1, 2, 3, 4...' },
+  { seq: [1, 3, 7, 15], answer: 31, options: [28, 30, 31, 32], hint: 'Double + 1 each time' },
+  { seq: [4, 9, 16, 25], answer: 36, options: [34, 35, 36, 49], hint: 'Squares: 2², 3², 4², 5²...' },
+];
+
+let patGame = {};
+
+function startPattern() {
+  const pats = shuffleArr([...PATTERNS]).slice(0, 12);
+  patGame = { patterns: pats, current: 0, playerScore: 0, aiScore: 0, correct: 0, locked: false, timerInt: null };
+  document.getElementById('pat-player-name').textContent = state.profile.avatar + ' ' + state.profile.name;
+  showSection('pattern-section');
+  loadPatternQuestion();
+}
+
+function loadPatternQuestion() {
+  const g = patGame;
+  if (g.current >= g.patterns.length) { endPatternGame(); return; }
+  const p = g.patterns[g.current];
+  g.locked = false;
+  document.getElementById('pat-q-num').textContent = g.current + 1;
+  document.getElementById('pat-hint').textContent = '💡 Hint: ' + p.hint;
+  document.getElementById('pat-feedback').classList.add('hidden');
+  document.getElementById('pat-player-score').textContent = g.playerScore;
+  document.getElementById('pat-ai-score').textContent = g.aiScore;
+  document.getElementById('pat-ps2').textContent = g.playerScore;
+  document.getElementById('pat-as2').textContent = g.aiScore;
+  // Render pattern display
+  const disp = document.getElementById('pattern-display');
+  disp.innerHTML = '';
+  p.seq.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'pattern-item';
+    el.textContent = n;
+    disp.appendChild(el);
+    const sep = document.createElement('div');
+    sep.className = 'pattern-item';
+    sep.textContent = '→';
+    sep.style.color = 'var(--text-muted)';
+    sep.style.fontSize = '1rem';
+    disp.appendChild(sep);
+  });
+  const blank = document.createElement('div');
+  blank.className = 'pattern-blank';
+  blank.textContent = '?';
+  disp.appendChild(blank);
+  // Render options
+  const opts = shuffleArr([...p.options]);
+  const container = document.getElementById('pat-options');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.style.textAlign = 'center';
+    btn.style.fontFamily = 'Orbitron,monospace';
+    btn.style.fontSize = '1.2rem';
+    btn.textContent = opt;
+    btn.onclick = () => selectPatternAnswer(opt, p.answer);
+    container.appendChild(btn);
+  });
+  startPatTimer(40);
+  scheduleAIAnswer(() => {
+    if (!g.locked) {
+      if (aiGetsItRight()) { g.aiScore++; document.getElementById('pat-ai-score').textContent = g.aiScore; document.getElementById('pat-as2').textContent = g.aiScore; setAiStatus('pat-ai-status', '✅ Solved!'); }
+      else { setAiStatus('pat-ai-status', '❌ Incorrect!'); }
+    }
+  }, 40000);
+}
+
+function startPatTimer(seconds) {
+  clearInterval(patGame.timerInt);
+  let t = seconds;
+  document.getElementById('pat-timer').textContent = t;
+  patGame.timerInt = setInterval(() => {
+    t--;
+    document.getElementById('pat-timer').textContent = t;
+    document.getElementById('pat-timer').style.color = t <= 10 ? 'var(--accent-red)' : 'var(--accent-primary)';
+    if (t <= 0) {
+      clearInterval(patGame.timerInt);
+      if (!patGame.locked) { patGame.locked = true; showPatFeedback(false, "⏰ Time's up! Answer: " + patGame.patterns[patGame.current].answer); const t2 = setTimeout(() => { patGame.current++; loadPatternQuestion(); }, 1500); state.currentGame.timers.push(t2); }
+    }
+  }, 1000);
+  state.currentGame.timers.push(patGame.timerInt);
+}
+
+function selectPatternAnswer(selected, correct) {
+  if (patGame.locked) return;
+  patGame.locked = true;
+  clearInterval(patGame.timerInt);
+  const opts = document.querySelectorAll('#pat-options .option-btn');
+  opts.forEach(b => {
+    b.disabled = true;
+    if (parseFloat(b.textContent) === correct) b.classList.add('correct');
+    else if (parseFloat(b.textContent) === selected) b.classList.add('incorrect');
+  });
+  const isCorrect = selected === correct;
+  if (isCorrect) { patGame.correct++; patGame.playerScore += 10; showPatFeedback(true, '✅ Correct! +10'); }
+  else { showPatFeedback(false, '❌ Wrong! Answer was: ' + correct); }
+  document.getElementById('pat-player-score').textContent = patGame.playerScore;
+  document.getElementById('pat-ps2').textContent = patGame.playerScore;
+  const t = setTimeout(() => { patGame.current++; loadPatternQuestion(); }, 1500);
+  state.currentGame.timers.push(t);
+}
+
+function showPatFeedback(correct, msg) {
+  const el = document.getElementById('pat-feedback');
+  el.className = 'feedback-msg ' + (correct ? 'correct' : 'incorrect');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function endPatternGame() {
+  const g = patGame;
+  endGame(g.playerScore, g.aiScore, g.patterns.length, g.correct, Math.max(10, g.playerScore + (g.playerScore > g.aiScore ? 50 : 10)));
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function shuffleArr(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+updateStats();
+renderLeaderboard();
+
+// Show profile modal on first visit
+if (!state.stats.gamesPlayed && !localStorage.getItem('can_you_beat_ai_seen')) {
+  localStorage.setItem('can_you_beat_ai_seen', '1');
+  setTimeout(showProfileModal, 800);
+}
+</script>
+</body>
+</html>
