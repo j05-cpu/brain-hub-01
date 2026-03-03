@@ -1172,3 +1172,391 @@ feedback-msg.correct { background: rgba(16,185,129,0.15); color: var(--accent-gr
       <div class="stat-label">Best Accuracy</div>
     </div>
   </div>
+
+<!-- Game Mode Cards -->
+  <div class="modes-grid">
+    <!-- Trivia -->
+    <div class="mode-card" style="--mode-color: var(--trivia); --mode-rgb: 245,158,11;">
+      <span class="mode-icon">🧠</span>
+      <div class="mode-title">TRIVIA SHOWDOWN</div>
+      <div class="mode-desc">Battle the AI on general knowledge across Science, History, Pop Culture & more. Beat the clock!</div>
+      <div class="mode-meta">
+        <span class="meta-tag difficulty-tag">MEDIUM</span>
+        <span class="meta-tag rounds-tag">10 Questions</span>
+        <span class="meta-tag rounds-tag">30s each</span>
+      </div>
+      <button class="mode-start-btn" onclick="startGame('trivia')">START GAME →</button>
+    </div>
+    <!-- Math -->
+    <div class="mode-card" style="--mode-color: var(--math); --mode-rgb: 59,130,246;">
+      <span class="mode-icon">🔢</span>
+      <div class="mode-title">MATH BLITZ</div>
+      <div class="mode-desc">Arithmetic to Algebra at lightning speed. Outrace the AI's calculation engine under pressure.</div>
+      <div class="mode-meta">
+        <span class="meta-tag difficulty-tag" style="color:var(--math); border-color:var(--math);">HARD</span>
+        <span class="meta-tag rounds-tag">15 Problems</span>
+        <span class="meta-tag rounds-tag">20s each</span>
+      </div>
+      <button class="mode-start-btn" style="background:var(--math);" onclick="startGame('math')">START GAME →</button>
+    </div>
+    <!-- Memory -->
+    <div class="mode-card" style="--mode-color: var(--memory); --mode-rgb: 139,92,246;">
+      <span class="mode-icon">🃏</span>
+      <div class="mode-title">MEMORY MATCH</div>
+      <div class="mode-desc">Flip and match 16 cards in fewest moves. Can your biological memory outclass AI's perfect recall?</div>
+      <div class="mode-meta">
+        <span class="meta-tag difficulty-tag" style="color:var(--memory); border-color:var(--memory);">MEDIUM</span>
+        <span class="meta-tag rounds-tag">16 Cards</span>
+        <span class="meta-tag rounds-tag">8 Pairs</span>
+      </div>
+      <button class="mode-start-btn" style="background:var(--memory);" onclick="startGame('memory')">START GAME →</button>
+    </div>
+    <!-- Reaction -->
+    <div class="mode-card" style="--mode-color: var(--reaction); --mode-rgb: 239,68,68;">
+      <span class="mode-icon">⚡</span>
+      <div class="mode-title">REACTION SPEED</div>
+      <div class="mode-desc">Pure reflex battle. Click the moment you see green. AI reacts in milliseconds — can you be faster?</div>
+      <div class="mode-meta">
+        <span class="meta-tag difficulty-tag" style="color:var(--reaction); border-color:var(--reaction);">EXTREME</span>
+        <span class="meta-tag rounds-tag">5 Rounds</span>
+        <span class="meta-tag rounds-tag">Best of 5</span>
+      </div>
+      <button class="mode-start-btn" style="background:var(--reaction);" onclick="startGame('reaction')">START GAME →</button>
+    </div>
+    <!-- Word -->
+    <div class="mode-card" style="--mode-color: var(--word); --mode-rgb: 16,185,129;">
+      <span class="mode-icon">📝</span>
+      <div class="mode-title">WORD SCRAMBLE</div>
+      <div class="mode-desc">Unscramble jumbled words before the AI decodes them. Linguistic speed vs computational processing.</div>
+      <div class="mode-meta">
+        <span class="meta-tag difficulty-tag" style="color:var(--word); border-color:var(--word);">MEDIUM</span>
+        <span class="meta-tag rounds-tag">10 Words</span>
+        <span class="meta-tag rounds-tag">25s each</span>
+      </div>
+      <button class="mode-start-btn" style="background:var(--word);" onclick="startGame('word')">START GAME →</button>
+    </div>
+    <!-- Pattern -->
+    <div class="mode-card" style="--mode-color: var(--pattern); --mode-rgb: 236,72,153;">
+      <span class="mode-icon">🔮</span>
+      <div class="mode-title">PATTERN IQ</div>
+      <div class="mode-desc">Decode numeric and symbolic sequences. Logical reasoning against an AI pattern recognition engine.</div>
+      <div class="mode-meta">
+        <span class="meta-tag difficulty-tag" style="color:var(--pattern); border-color:var(--pattern);">HARD</span>
+        <span class="meta-tag rounds-tag">12 Sequences</span>
+        <span class="meta-tag rounds-tag">40s each</span>
+      </div>
+      <button class="mode-start-btn" style="background:var(--pattern);" onclick="startGame('pattern')">START GAME →</button>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="leaderboard-section">
+    <div class="section-title">
+      <h2>🏅 GLOBAL LEADERBOARD</h2>
+      <p>Top players who have proven they can outsmart AI</p>
+    </div>
+    <div class="leaderboard-table">
+      <div class="lb-row header">
+        <div>#</div><div>Player</div><div>Score</div><div>Wins</div><div>Level</div>
+      </div>
+      <div id="leaderboard-body"></div>
+    </div>
+  </div>
+
+</div><!-- /home-screen -->
+
+<!-- ============================================================
+     TRIVIA GAME SECTION
+     ============================================================ -->
+<div id="trivia-section" class="game-section container hidden">
+  <div class="game-header">
+    <button class="back-btn" onclick="showHome()">← Home</button>
+    <div class="game-title-row">
+      <span style="font-size:1.5rem">🧠</span>
+      <h2 style="color:var(--trivia)">TRIVIA SHOWDOWN</h2>
+    </div>
+  </div>
+  <div class="game-status-bar">
+    <div class="status-item"><div class="status-label">Question</div><div class="status-value"><span id="triv-q-num">1</span>/10</div></div>
+    <div class="status-item"><div class="status-label">Your Score</div><div class="status-value" id="triv-player-score">0</div></div>
+    <div class="status-item"><div class="status-label">AI Score</div><div class="status-value" style="color:var(--accent-secondary)" id="triv-ai-score">0</div></div>
+    <div class="status-item"><div class="status-label">Streak</div><div class="status-value" id="triv-streak">0🔥</div></div>
+  </div>
+  <div class="timer-ring-wrap">
+    <div class="timer-ring">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle class="bg" cx="40" cy="40" r="36"/>
+        <circle class="progress" id="triv-timer-circle" cx="40" cy="40" r="36"/>
+      </svg>
+      <div class="timer-number" id="triv-timer">30</div>
+    </div>
+  </div>
+  <div class="question-box">
+    <div class="question-category" id="triv-category">SCIENCE</div>
+    <div class="question-text" id="triv-question">Loading question...</div>
+    <div class="question-hint" id="triv-hint"></div>
+  </div>
+  <div class="options-grid" id="triv-options"></div>
+  <div id="triv-feedback" class="feedback-msg hidden"></div>
+  <div class="vs-layout">
+    <div class="player-panel">
+      <div class="panel-label">You</div>
+      <div class="panel-name" id="triv-player-name">Player</div>
+      <div class="panel-score" id="triv-ps2">0</div>
+      <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;" id="triv-accuracy-disp">Accuracy: 0%</div>
+    </div>
+    <div class="vs-divider"><div class="vs-text">VS</div></div>
+    <div class="ai-panel">
+      <div class="panel-label">AI Opponent</div>
+      <div class="panel-name">ATLAS-7</div>
+      <div class="panel-score" id="triv-as2">0</div>
+      <div class="ai-thinking">
+        <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+        <span class="ai-status-text" id="triv-ai-status">Processing...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MATH GAME SECTION
+     ============================================================ -->
+<div id="math-section" class="game-section container hidden">
+  <div class="game-header">
+    <button class="back-btn" onclick="showHome()">← Home</button>
+    <div class="game-title-row">
+      <span style="font-size:1.5rem">🔢</span>
+      <h2 style="color:var(--math)">MATH BLITZ</h2>
+    </div>
+  </div>
+  <div class="game-status-bar">
+    <div class="status-item"><div class="status-label">Problem</div><div class="status-value"><span id="math-q-num">1</span>/15</div></div>
+    <div class="status-item"><div class="status-label">Your Score</div><div class="status-value" id="math-player-score">0</div></div>
+    <div class="status-item"><div class="status-label">AI Score</div><div class="status-value" style="color:var(--accent-secondary)" id="math-ai-score">0</div></div>
+    <div class="status-item"><div class="status-label">Time Left</div><div class="status-value" id="math-timer">20</div></div>
+  </div>
+  <div class="question-box">
+    <div class="question-category" style="color:var(--math)">MATH PROBLEM</div>
+    <div class="question-text" id="math-question" style="font-family:'Orbitron',monospace; font-size:2rem;">?</div>
+  </div>
+  <div class="answer-input-row">
+    <input class="answer-input" id="math-input" type="text" inputmode="numeric" placeholder="Your answer..." onkeypress="if(event.key==='Enter') submitMath()">
+    <button class="submit-btn" onclick="submitMath()">SUBMIT</button>
+  </div>
+  <div id="math-feedback" class="feedback-msg hidden"></div>
+  <div class="vs-layout">
+    <div class="player-panel">
+      <div class="panel-label">You</div>
+      <div class="panel-name" id="math-player-name">Player</div>
+      <div class="panel-score" id="math-ps2">0</div>
+    </div>
+    <div class="vs-divider"><div class="vs-text">VS</div></div>
+    <div class="ai-panel">
+      <div class="panel-label">AI Opponent</div>
+      <div class="panel-name">CALC-9</div>
+      <div class="panel-score" id="math-as2">0</div>
+      <div class="ai-thinking">
+        <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+        <span class="ai-status-text" id="math-ai-status">Calculating...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MEMORY GAME SECTION
+     ============================================================ -->
+<div id="memory-section" class="game-section container hidden">
+  <div class="game-header">
+    <button class="back-btn" onclick="showHome()">← Home</button>
+    <div class="game-title-row">
+      <span style="font-size:1.5rem">🃏</span>
+      <h2 style="color:var(--memory)">MEMORY MATCH</h2>
+    </div>
+  </div>
+  <div class="game-status-bar">
+    <div class="status-item"><div class="status-label">Your Moves</div><div class="status-value" id="mem-moves">0</div></div>
+    <div class="status-item"><div class="status-label">Pairs Found</div><div class="status-value" id="mem-pairs">0/8</div></div>
+    <div class="status-item"><div class="status-label">AI Moves</div><div class="status-value" style="color:var(--accent-secondary)" id="mem-ai-moves">0</div></div>
+    <div class="status-item"><div class="status-label">Time</div><div class="status-value" id="mem-time">0s</div></div>
+  </div>
+  <div class="memory-grid" id="memory-grid"></div>
+  <div class="vs-layout">
+    <div class="player-panel">
+      <div class="panel-label">You</div>
+      <div class="panel-name" id="mem-player-name">Player</div>
+      <div class="panel-score" id="mem-ps2">0 pairs</div>
+    </div>
+    <div class="vs-divider"><div class="vs-text">VS</div></div>
+    <div class="ai-panel">
+      <div class="panel-label">AI Opponent</div>
+      <div class="panel-name">MEM-BOT</div>
+      <div class="panel-score" id="mem-as2">0 pairs</div>
+      <div class="ai-thinking">
+        <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+        <span class="ai-status-text" id="mem-ai-status">Memorizing...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     REACTION GAME SECTION
+     ============================================================ -->
+<div id="reaction-section" class="game-section container hidden">
+  <div class="game-header">
+    <button class="back-btn" onclick="showHome()">← Home</button>
+    <div class="game-title-row">
+      <span style="font-size:1.5rem">⚡</span>
+      <h2 style="color:var(--reaction)">REACTION SPEED</h2>
+    </div>
+  </div>
+  <div class="game-status-bar">
+    <div class="status-item"><div class="status-label">Round</div><div class="status-value"><span id="react-round">1</span>/5</div></div>
+    <div class="status-item"><div class="status-label">Your Wins</div><div class="status-value" id="react-player-wins">0</div></div>
+    <div class="status-item"><div class="status-label">AI Wins</div><div class="status-value" style="color:var(--accent-secondary)" id="react-ai-wins">0</div></div>
+    <div class="status-item"><div class="status-label">Avg Time</div><div class="status-value" id="react-avg">-</div></div>
+  </div>
+  <div class="reaction-area waiting" id="reaction-area" onclick="handleReactionClick()">
+    <div class="reaction-icon" id="react-icon">⏳</div>
+    <div class="reaction-prompt" id="react-prompt">Click START to begin</div>
+    <div class="reaction-sub" id="react-sub">Click when you see GREEN</div>
+    <div class="reaction-time hidden" id="react-time-disp">---</div>
+  </div>
+  <div class="reaction-history" id="react-history"></div>
+  <div class="vs-layout" style="margin-top:20px;">
+    <div class="player-panel">
+      <div class="panel-label">You</div>
+      <div class="panel-name" id="react-player-name">Player</div>
+      <div class="panel-score" id="react-ps2">0 wins</div>
+    </div>
+    <div class="vs-divider"><div class="vs-text">VS</div></div>
+    <div class="ai-panel">
+      <div class="panel-label">AI Opponent</div>
+      <div class="panel-name">REFLEX-X</div>
+      <div class="panel-score" id="react-as2">0 wins</div>
+      <div class="ai-thinking">
+        <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+        <span class="ai-status-text" id="react-ai-status">Standing by...</span>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;margin-top:20px;">
+    <button class="submit-btn" id="react-start-btn" onclick="startReactionRound()">START ROUND</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     WORD SCRAMBLE SECTION
+     ============================================================ -->
+<div id="word-section" class="game-section container hidden">
+  <div class="game-header">
+    <button class="back-btn" onclick="showHome()">← Home</button>
+    <div class="game-title-row">
+      <span style="font-size:1.5rem">📝</span>
+      <h2 style="color:var(--word)">WORD SCRAMBLE</h2>
+    </div>
+  </div>
+  <div class="game-status-bar">
+    <div class="status-item"><div class="status-label">Word</div><div class="status-value"><span id="word-q-num">1</span>/10</div></div>
+    <div class="status-item"><div class="status-label">Your Score</div><div class="status-value" id="word-player-score">0</div></div>
+    <div class="status-item"><div class="status-label">AI Score</div><div class="status-value" style="color:var(--accent-secondary)" id="word-ai-score">0</div></div>
+    <div class="status-item"><div class="status-label">Time Left</div><div class="status-value" id="word-timer">25</div></div>
+  </div>
+  <div class="question-box">
+    <div class="question-category" style="color:var(--word)">UNSCRAMBLE THE WORD</div>
+    <div class="question-text" style="font-family:'Orbitron',monospace; font-size:2.5rem; letter-spacing:6px; color:var(--word)" id="word-scrambled">???</div>
+    <div class="question-hint" id="word-hint">Hint: ...</div>
+  </div>
+  <div class="answer-input-row">
+    <input class="answer-input" id="word-input" type="text" placeholder="Your answer..." onkeypress="if(event.key==='Enter') submitWord()">
+    <button class="submit-btn" style="background:linear-gradient(135deg,var(--word),#059669);" onclick="submitWord()">SUBMIT</button>
+  </div>
+  <div id="word-feedback" class="feedback-msg hidden"></div>
+  <div class="vs-layout">
+    <div class="player-panel">
+      <div class="panel-label">You</div>
+      <div class="panel-name" id="word-player-name">Player</div>
+      <div class="panel-score" id="word-ps2">0</div>
+    </div>
+    <div class="vs-divider"><div class="vs-text">VS</div></div>
+    <div class="ai-panel">
+      <div class="panel-label">AI Opponent</div>
+      <div class="panel-name">LEXIS-4</div>
+      <div class="panel-score" id="word-as2">0</div>
+      <div class="ai-thinking">
+        <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+        <span class="ai-status-text" id="word-ai-status">Decoding...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PATTERN GAME SECTION
+     ============================================================ -->
+<div id="pattern-section" class="game-section container hidden">
+  <div class="game-header">
+    <button class="back-btn" onclick="showHome()">← Home</button>
+    <div class="game-title-row">
+      <span style="font-size:1.5rem">🔮</span>
+      <h2 style="color:var(--pattern)">PATTERN IQ</h2>
+    </div>
+  </div>
+  <div class="game-status-bar">
+    <div class="status-item"><div class="status-label">Sequence</div><div class="status-value"><span id="pat-q-num">1</span>/12</div></div>
+    <div class="status-item"><div class="status-label">Your Score</div><div class="status-value" id="pat-player-score">0</div></div>
+    <div class="status-item"><div class="status-label">AI Score</div><div class="status-value" style="color:var(--accent-secondary)" id="pat-ai-score">0</div></div>
+    <div class="status-item"><div class="status-label">Time Left</div><div class="status-value" id="pat-timer">40</div></div>
+  </div>
+  <div class="question-box">
+    <div class="question-category" style="color:var(--pattern)">FIND THE NEXT NUMBER</div>
+    <div class="pattern-display" id="pattern-display"></div>
+    <div class="question-hint" id="pat-hint"></div>
+  </div>
+  <div class="options-grid" id="pat-options"></div>
+  <div id="pat-feedback" class="feedback-msg hidden"></div>
+  <div class="vs-layout">
+    <div class="player-panel">
+      <div class="panel-label">You</div>
+      <div class="panel-name" id="pat-player-name">Player</div>
+      <div class="panel-score" id="pat-ps2">0</div>
+    </div>
+    <div class="vs-divider"><div class="vs-text">VS</div></div>
+    <div class="ai-panel">
+      <div class="panel-label">AI Opponent</div>
+      <div class="panel-name">NEURAL-Q</div>
+      <div class="panel-score" id="pat-as2">0</div>
+      <div class="ai-thinking">
+        <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+        <span class="ai-status-text" id="pat-ai-status">Analyzing...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     END GAME SUMMARY SECTION
+     ============================================================ -->
+<div id="summary-section" class="game-section container hidden">
+  <div class="summary-panel">
+    <div class="result-icon" id="result-icon">🏆</div>
+    <div class="result-title" id="result-title">YOU WIN!</div>
+    <div class="result-subtitle" id="result-subtitle">You proved humans can beat AI!</div>
+    <div class="score-comparison">
+      <div class="score-side">
+        <div class="score-label" id="sum-player-label">You</div>
+        <div class="score-num text-accent" id="sum-player-score">0</div>
+        <div class="score-sub" id="sum-player-sub">points</div>
+      </div>
+      <div style="font-family:'Orbitron',monospace; font-size:1.5rem; color:var(--text-muted);">VS</div>
+      <div class="score-side">
+        <div class="score-label">AI</div>
+        <div class="score-num" style="color:var(--accent-secondary)" id="sum-ai-score">0</div>
+        <div class="score-sub">points</div>
+      </div>
+    </div>
+    <div class="xp-gained-section">
+      <div class="xp-gained-label">XP GAINED THIS ROUND</div>
+      <div class="xp-gained-value" id="xp-gained-disp">+0 XP</div>
+      <div class="xp-gained-bar-
