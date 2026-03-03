@@ -628,3 +628,93 @@ game-header {
   margin-bottom: 16px;
   transition: all 0.3s;
 }
+
+feedback-msg.correct { background: rgba(16,185,129,0.15); color: var(--accent-green); border: 1px solid var(--accent-green); }
+.feedback-msg.incorrect { background: rgba(239,68,68,0.15); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+/* ============================================================
+   MEMORY GAME
+   ============================================================ */
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.memory-card {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+.memory-card.flipped { transform: rotateY(180deg); }
+.memory-card.matched { opacity: 0.7; pointer-events: none; }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+}
+
+.card-front {
+  background: linear-gradient(135deg, var(--accent-secondary), #2d1b69);
+  border: 1px solid rgba(124,58,237,0.4);
+  font-size: 2rem;
+}
+
+.card-back {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 0.6rem;
+  font-family: 'Orbitron', monospace;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  transform: rotateY(180deg);
+}
+
+/* ============================================================
+   REACTION GAME
+   ============================================================ */
+.reaction-area {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  user-select: none;
+}
+
+.reaction-area.waiting {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+.reaction-area.ready {
+  background: rgba(239,68,68,0.1);
+  border-color: var(--accent-red);
+  box-shadow: 0 0 40px rgba(239,68,68,0.2);
+}
+
+.reaction-area.go {
+  background: rgba(16,185,129,0.1);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 40px rgba(16,185,129,0.3);
+  animation: pulse-go 0.3s ease;
+}
